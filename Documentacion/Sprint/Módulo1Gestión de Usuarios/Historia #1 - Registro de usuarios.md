@@ -51,6 +51,7 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
 }
 
 ## Respuesta de error por email duplicado:
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -63,6 +64,7 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
 }
 
 ## Respuesta de error por formato inválido:
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -75,6 +77,7 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
 }
 
 ## Respuesta de error por rol inválido:
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -119,6 +122,7 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
 - Autenticación requerida: Sí (solo administradores)
 
 ## 📤 Ejemplo de Respuesta JSON
+```json
 {
   "nombre_completo": "Juan Pérez",
   "email": "juan@example.com",
@@ -128,6 +132,7 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
 }
 
 ## 📤 Ejemplo de Respuesta JSON Exitosa (201 Created)
+```json
 {
   "success": true,
   "statusCode": 201,
@@ -145,6 +150,7 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
 }
 
 ## 📤 Ejemplo de Respuesta JSON Error (400 Bad Request)
+```json
 {
   "success": false,
   "statusCode": 400,
