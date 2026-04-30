@@ -40,8 +40,9 @@ Para llevar un inventario actualizado de todos los inmuebles que pertenecen al c
     "fecha_registro": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por inmueble duplicado:
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -52,8 +53,9 @@ Para llevar un inventario actualizado de todos los inmuebles que pertenecen al c
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por área inválida:
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -64,8 +66,9 @@ Para llevar un inventario actualizado de todos los inmuebles que pertenecen al c
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por campo obligatorio faltante:
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -76,7 +79,7 @@ Para llevar un inventario actualizado de todos los inmuebles que pertenecen al c
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 ## Reglas de negocio
 - Solo los administradores pueden registrar nuevos inmuebles.
@@ -110,13 +113,15 @@ Para llevar un inventario actualizado de todos los inmuebles que pertenecen al c
 - Autenticación requerida: Sí (solo administradores)
 
 ## 📤 Ejemplo de Request JSON
+```json
 {
   "numero": "101",
   "torre": "A",
   "area_m2": 75.5
 }
+```
 ## 📤 Ejemplo de Respuesta JSON Exitosa (201 Created)
-
+```json
 {
   "success": true,
   "statusCode": 201,
@@ -130,8 +135,9 @@ Para llevar un inventario actualizado de todos los inmuebles que pertenecen al c
     "fecha_registro": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (400 Bad Request)
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -142,7 +148,7 @@ Para llevar un inventario actualizado de todos los inmuebles que pertenecen al c
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 ## 🔍 Casos de Prueba Funcional
 ### ✅ Caso 1: Registro exitoso de inmueble

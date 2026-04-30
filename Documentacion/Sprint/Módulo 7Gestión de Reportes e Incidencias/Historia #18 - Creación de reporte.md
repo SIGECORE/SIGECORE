@@ -49,9 +49,9 @@ Para que la administración conozca la situación de manera detallada y pueda to
     "fecha_reporte": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por tipo inválido:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -62,9 +62,9 @@ Para que la administración conozca la situación de manera detallada y pueda to
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por campo obligatorio faltante:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -75,7 +75,7 @@ Para que la administración conozca la situación de manera detallada y pueda to
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -117,15 +117,15 @@ La tabla debe incluir las siguientes columnas:
 - Autenticación requerida: Sí (residente o administrador)
 
 ## 📤 Ejemplo de Request JSON
-
+```json
 {
   "tipo": "daño",
   "descripcion": "El bombillo del pasillo del tercer piso no funciona",
   "evidencias": ["/uploads/reportes/foto_1.jpg", "/uploads/reportes/foto_2.jpg"]
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Exitosa (201 Created)
-
+```json
 {
   "success": true,
   "statusCode": 201,
@@ -144,9 +144,9 @@ La tabla debe incluir las siguientes columnas:
     "fecha_reporte": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (400 Bad Request)
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -157,7 +157,7 @@ La tabla debe incluir las siguientes columnas:
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional

@@ -27,9 +27,8 @@ Para saber si tengo cuotas pendientes y tener claridad sobre mi situación finan
 - [ ] Se retornan los pagos ordenados por fecha descendente.
 
 ### 2. 📤 Estructura de la información
-```json
 - [ ] Respuesta de consulta exitosa:
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -70,9 +69,9 @@ Para saber si tengo cuotas pendientes y tener claridad sobre mi situación finan
     ]
   }
 }
-
+```
 - [ ] Respuesta cuando no hay pagos registrados:
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -85,9 +84,9 @@ Para saber si tengo cuotas pendientes y tener claridad sobre mi situación finan
     "pagos": []
   }
 }
-
+```
 - [ ] Respuesta de error por usuario no encontrado:
-
+```json
 {
   "success": false,
   "statusCode": 404,
@@ -98,7 +97,7 @@ Para saber si tengo cuotas pendientes y tener claridad sobre mi situación finan
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -134,7 +133,7 @@ Para saber si tengo cuotas pendientes y tener claridad sobre mi situación finan
 - URL: GET /api/v1/pagos/usuario/5
 
 ## 📤 Ejemplo de Respuesta JSON Exitosa (200 OK)
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -175,9 +174,9 @@ Para saber si tengo cuotas pendientes y tener claridad sobre mi situación finan
     ]
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (403 Forbidden)
-
+```json
 {
   "success": false,
   "statusCode": 403,
@@ -188,7 +187,7 @@ Para saber si tengo cuotas pendientes y tener claridad sobre mi situación finan
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional

@@ -51,9 +51,9 @@ Para evitar desplazarme a pagar en efectivo y tener un comprobante digital inmed
     "comprobante_url": "/uploads/comprobantes/recibo_1.pdf"
   }
 }
-
+```
 - [ ] Respuesta de error por monto inválido:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -64,9 +64,9 @@ Para evitar desplazarme a pagar en efectivo y tener un comprobante digital inmed
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por inmueble no encontrado:
-
+```json
 {
   "success": false,
   "statusCode": 404,
@@ -77,9 +77,9 @@ Para evitar desplazarme a pagar en efectivo y tener un comprobante digital inmed
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por usuario no autorizado:
-
+```json
 {
   "success": false,
   "statusCode": 403,
@@ -90,9 +90,9 @@ Para evitar desplazarme a pagar en efectivo y tener un comprobante digital inmed
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por pasarela de pagos:
-
+```json
 {
   "success": false,
   "statusCode": 502,
@@ -103,7 +103,7 @@ Para evitar desplazarme a pagar en efectivo y tener un comprobante digital inmed
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -144,16 +144,16 @@ La tabla debe incluir las siguientes columnas:
 - Autenticación requerida: Sí (residente propietario o administrador)
 
 ## 📤 Ejemplo de Request JSON
-
+```json
 {
   "id_inmueble": 1,
   "monto": 150000.00,
   "metodo_pago": "tarjeta_credito",
   "token_pasarela": "tok_visa_1234"
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Exitosa (201 Created)
-
+```json
 {
   "success": true,
   "statusCode": 201,
@@ -169,7 +169,7 @@ La tabla debe incluir las siguientes columnas:
     "comprobante_url": "/uploads/comprobantes/recibo_1.pdf"
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (502 Bad Gateway)
 ```json
 {
@@ -182,7 +182,7 @@ La tabla debe incluir las siguientes columnas:
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional

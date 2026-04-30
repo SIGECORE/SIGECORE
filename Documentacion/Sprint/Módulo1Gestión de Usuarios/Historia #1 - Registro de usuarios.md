@@ -32,7 +32,7 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
 - [ ] No se devuelve la contraseña en la respuesta.
 
 ## 2. 📤 Estructura de la información
-## Se responde con la siguiente estructura en JSON para registro exitoso:
+- [ ] Se responde con la siguiente estructura en JSON para registro exitoso:
 ```json
 {
   "success": true,
@@ -49,8 +49,8 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
     "fecha_registro": "2026-04-28T10:30:00Z"
   }
 }
-```json
-## Respuesta de error por email duplicado:
+```
+- [ ] Respuesta de error por email duplicado:
 ```json
 {
   "success": false,
@@ -62,8 +62,8 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-```json
-## Respuesta de error por formato inválido:
+```
+- [ ] Respuesta de error por formato inválido:
 ```json
 {
   "success": false,
@@ -75,8 +75,8 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-```json
-## Respuesta de error por rol inválido:
+```
+- [ ] Respuesta de error por rol inválido:
 ```json
 {
   "success": false,
@@ -88,7 +88,7 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-```json
+```
 ## 🔧 Notas Técnicas
 ## Reglas de negocio
 - Solo los administradores pueden registrar nuevos usuarios.
@@ -130,7 +130,7 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
   "password": "123456",
   "id_rol": 2
 }
-```json
+```
 ## 📤 Ejemplo de Respuesta JSON Exitosa (201 Created)
 ```json
 {
@@ -148,7 +148,7 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
     "fecha_registro": "2026-04-28T10:30:00Z"
   }
 }
-```json
+```
 ## 📤 Ejemplo de Respuesta JSON Error (400 Bad Request)
 ```json
 {
@@ -161,7 +161,7 @@ Para que los residentes puedan acceder al sistema con sus propias credenciales y
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-```json
+```
 ## 🧪 Requisitos de Pruebas
 ## 🔍 Casos de Prueba Funcional
 ## ✅ Caso 1: Registro exitoso con todos los campos válidos

@@ -50,7 +50,7 @@ Para liberar el espacio para que otros residentes puedan reservarlo y evitar san
     "fecha_cancelacion": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por cancelación tardía:
 ```json
 {
@@ -63,7 +63,7 @@ Para liberar el espacio para que otros residentes puedan reservarlo y evitar san
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por reserva ya cancelada:
 ```json
 {
@@ -76,7 +76,7 @@ Para liberar el espacio para que otros residentes puedan reservarlo y evitar san
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -128,7 +128,7 @@ Para liberar el espacio para que otros residentes puedan reservarlo y evitar san
     "fecha_cancelacion": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (400 Bad Request)
 ```json
 {
@@ -141,7 +141,7 @@ Para liberar el espacio para que otros residentes puedan reservarlo y evitar san
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional

@@ -58,9 +58,9 @@ Para evitar conflictos de horarios entre diferentes residentes y garantizar el u
     ]
   }
 }
-
+```
 - [ ] Respuesta para PATCH /api/v1/reservas/{id}/estado exitoso:
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -72,9 +72,9 @@ Para evitar conflictos de horarios entre diferentes residentes y garantizar el u
     "aprobado_por": "Administrador (ID: 1)"
   }
 }
-
+```
 - [ ] Respuesta de error por reserva no pendiente:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -85,7 +85,7 @@ Para evitar conflictos de horarios entre diferentes residentes y garantizar el u
     "timestamp": "2026-04-29T09:00:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -128,13 +128,13 @@ Para evitar conflictos de horarios entre diferentes residentes y garantizar el u
 - URL: PATCH /api/v1/reservas/1/estado
 
 - Request Body:
-
+```json
 {
   "estado": "aprobada"
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Exitosa (200 OK)
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -146,9 +146,9 @@ Para evitar conflictos de horarios entre diferentes residentes y garantizar el u
     "aprobado_por": "Administrador (ID: 1)"
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (403 Forbidden)
-
+```json
 {
   "success": false,
   "statusCode": 403,
@@ -159,7 +159,7 @@ Para evitar conflictos de horarios entre diferentes residentes y garantizar el u
     "timestamp": "2026-04-29T09:00:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional

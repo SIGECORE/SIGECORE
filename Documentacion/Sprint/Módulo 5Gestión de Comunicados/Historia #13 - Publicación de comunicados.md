@@ -48,9 +48,9 @@ Para informar a todos los residentes sobre avisos importantes como reuniones, co
     "activo": true
   }
 }
-
+```
 - [ ] Respuesta de error por campos obligatorios faltantes:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -61,9 +61,9 @@ Para informar a todos los residentes sobre avisos importantes como reuniones, co
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por fecha de expiración inválida:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -74,7 +74,7 @@ Para informar a todos los residentes sobre avisos importantes como reuniones, co
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -115,16 +115,16 @@ La tabla debe incluir las siguientes columnas:
 - Autenticación requerida: Sí (solo administradores)
 
 ## 📤 Ejemplo de Request JSON
-
+```json
 {
   "titulo": "Corte de agua programado",
   "contenido": "El día 15 de mayo habrá corte de agua de 8:00 a 12:00 por mantenimiento.",
   "archivos_adjuntos": ["/uploads/comunicados/aviso_agua.pdf"],
   "fecha_expiracion": "2026-05-16T00:00:00Z"
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Exitosa (201 Created)
-
+```json
 {
   "success": true,
   "statusCode": 201,
@@ -143,9 +143,9 @@ La tabla debe incluir las siguientes columnas:
     "activo": true
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (403 Forbidden)
-
+```json
 {
   "success": false,
   "statusCode": 403,
@@ -156,7 +156,7 @@ La tabla debe incluir las siguientes columnas:
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional

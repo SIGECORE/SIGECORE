@@ -68,7 +68,7 @@ Para hacer seguimiento a mis solicitudes y saber si mi reserva fue confirmada
     ]
   }
 }
-
+```
 - [ ] Respuesta cuando no hay reservas:
 ```json
 {
@@ -83,7 +83,7 @@ Para hacer seguimiento a mis solicitudes y saber si mi reserva fue confirmada
     "reservas": []
   }
 }
-
+```
 - [ ] Respuesta de error por usuario no encontrado:
 ```json
 {
@@ -96,7 +96,7 @@ Para hacer seguimiento a mis solicitudes y saber si mi reserva fue confirmada
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -171,7 +171,7 @@ Para hacer seguimiento a mis solicitudes y saber si mi reserva fue confirmada
     ]
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (403 Forbidden)
 ```json
 {
@@ -184,7 +184,7 @@ Para hacer seguimiento a mis solicitudes y saber si mi reserva fue confirmada
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional

@@ -52,9 +52,9 @@ Para evitar conflictos de horarios entre diferentes residentes y garantizar el u
     "fecha_solicitud": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por zona no disponible:
-
+```json
 {
   "success": false,
   "statusCode": 409,
@@ -65,9 +65,9 @@ Para evitar conflictos de horarios entre diferentes residentes y garantizar el u
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por morosidad:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -78,7 +78,7 @@ Para evitar conflictos de horarios entre diferentes residentes y garantizar el u
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -124,7 +124,7 @@ Para evitar conflictos de horarios entre diferentes residentes y garantizar el u
 - Autenticación requerida: Sí (residente o administrador)
 
 ## 📤 Ejemplo de Request JSON
-
+```json
 {
   "id_zona": 1,
   "fecha": "2026-05-15",
@@ -132,9 +132,9 @@ Para evitar conflictos de horarios entre diferentes residentes y garantizar el u
   "hora_fin": "18:00",
   "observaciones": "Cumpleaños familiar"
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Exitosa (201 Created)
-
+```json
 {
   "success": true,
   "statusCode": 201,
@@ -152,9 +152,9 @@ Para evitar conflictos de horarios entre diferentes residentes y garantizar el u
     "fecha_solicitud": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (409 Conflict)
-
+```json
 {
   "success": false,
   "statusCode": 409,
@@ -165,7 +165,7 @@ Para evitar conflictos de horarios entre diferentes residentes y garantizar el u
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional

@@ -19,7 +19,7 @@ Para acceder de forma segura a las funcionalidades que me corresponden según mi
 - Se retorna una respuesta JSON con código 200 OK con el token y los datos básicos del usuario.
 
 ## ✅ Criterios de Aceptación
-## 1. 🔍 Estructura y lógica del servicio
+### 1. 🔍 Estructura y lógica del servicio
 
 - [ ] Se expone un endpoint POST /api/v1/usuarios/login para inicio de sesión.
 - [ ] Se valida que los campos email y password sean obligatorios.
@@ -29,7 +29,7 @@ Para acceder de forma segura a las funcionalidades que me corresponden según mi
 - [ ] Se genera un token JWT válido con expiración de 8 horas.
 - [ ] Se registra el intento de login (fecha/hora) en una tabla de auditoría.
 
-## 2. 📤 Estructura de la información
+### 2. 📤 Estructura de la información
 
 - [ ] Se responde con la siguiente estructura en JSON para login exitoso:
 ```json
@@ -48,8 +48,9 @@ Para acceder de forma segura a las funcionalidades que me corresponden según mi
     }
   }
 }
-
+```
 - [ ] Respuesta de error por credenciales incorrectas:
+```json
 {
   "success": false,
   "statusCode": 401,
@@ -60,8 +61,9 @@ Para acceder de forma segura a las funcionalidades que me corresponden según mi
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por usuario inactivo:
+```json
 {
   "success": false,
   "statusCode": 401,
@@ -72,8 +74,9 @@ Para acceder de forma segura a las funcionalidades que me corresponden según mi
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por cuenta bloqueada:
+```json
 {
   "success": false,
   "statusCode": 423,
@@ -84,7 +87,7 @@ Para acceder de forma segura a las funcionalidades que me corresponden según mi
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 ## Reglas de negocio
 - Después de 3 intentos fallidos de login, la cuenta se bloquea por 30 minutos.
@@ -115,12 +118,14 @@ Para acceder de forma segura a las funcionalidades que me corresponden según mi
 - Autenticación requerida: No
 
 ## 📤 Ejemplo de Request JSON
+```json
 {
   "email": "juan@example.com",
   "password": "123456"
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Exitosa (200 OK)
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -136,8 +141,9 @@ Para acceder de forma segura a las funcionalidades que me corresponden según mi
     }
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (401 Unauthorized)
+```json
 {
   "success": false,
   "statusCode": 401,
@@ -148,7 +154,7 @@ Para acceder de forma segura a las funcionalidades que me corresponden según mi
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 ## 🔍 Casos de Prueba Funcional
 ## ✅ Caso 1: Login exitoso con credenciales correctas

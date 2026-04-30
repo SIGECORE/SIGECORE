@@ -31,9 +31,9 @@ Para mantener informado al residente sobre el avance de su reporte y garantizar 
 - [ ] Se registra la fecha de resolución cuando el estado cambia a "resuelto".
 
 ### 2. 📤 Estructura de la información
-```json
-- [ ] Respuesta de actualización exitosa:
 
+- [ ] Respuesta de actualización exitosa:
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -51,9 +51,9 @@ Para mantener informado al residente sobre el avance de su reporte y garantizar 
     "fecha_resolucion": null
   }
 }
-
+```
 - [ ] Respuesta cuando se resuelve el reporte:
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -71,9 +71,9 @@ Para mantener informado al residente sobre el avance de su reporte y garantizar 
     "fecha_resolucion": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por estado inválido:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -84,9 +84,9 @@ Para mantener informado al residente sobre el avance de su reporte y garantizar 
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por reporte no encontrado:
-
+```json
 {
   "success": false,
   "statusCode": 404,
@@ -97,7 +97,7 @@ Para mantener informado al residente sobre el avance de su reporte y garantizar 
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -135,15 +135,15 @@ La tabla debe incluir las siguientes columnas adicionales:
 
 - URL: PATCH /api/v1/reportes/1/estado
 - Request Body:
-
+```json
 {
   "estado": "en_proceso",
   "observaciones": "Se asignó al personal de mantenimiento",
   "id_responsable": 3
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Exitosa (200 OK)
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -161,9 +161,9 @@ La tabla debe incluir las siguientes columnas adicionales:
     "fecha_resolucion": null
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (403 Forbidden)
-
+```json
 {
   "success": false,
   "statusCode": 403,
@@ -174,7 +174,7 @@ La tabla debe incluir las siguientes columnas adicionales:
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional

@@ -45,9 +45,9 @@ Para saber si puedo reservar el espacio para mi evento sin tener que preguntar m
     "disponible": true
   }
 }
-
+```
 - [ ] Se responde cuando NO está disponible:
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -67,9 +67,9 @@ Para saber si puedo reservar el espacio para mi evento sin tener que preguntar m
     }
   }
 }
-
+```
 - [ ] Respuesta de error por zona no encontrada:
-
+```json
 {
   "success": false,
   "statusCode": 404,
@@ -80,9 +80,9 @@ Para saber si puedo reservar el espacio para mi evento sin tener que preguntar m
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por zona en mantenimiento:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -93,7 +93,7 @@ Para saber si puedo reservar el espacio para mi evento sin tener que preguntar m
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -133,7 +133,7 @@ Para saber si puedo reservar el espacio para mi evento sin tener que preguntar m
 - GET /api/v1/zonas/disponibilidad?zona_id=1&fecha=2026-05-15&hora_inicio=14:00&hora_fin=18:00
 
 ## 📤 Ejemplo de Respuesta JSON Exitosa (Disponible)
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -147,9 +147,9 @@ Para saber si puedo reservar el espacio para mi evento sin tener que preguntar m
     "disponible": true
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Exitosa (No disponible)
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -169,9 +169,9 @@ Para saber si puedo reservar el espacio para mi evento sin tener que preguntar m
     }
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (404 Not Found)
-
+```json
 {
   "success": false,
   "statusCode": 404,
@@ -182,7 +182,7 @@ Para saber si puedo reservar el espacio para mi evento sin tener que preguntar m
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional

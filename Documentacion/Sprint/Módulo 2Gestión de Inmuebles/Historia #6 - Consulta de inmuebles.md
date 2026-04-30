@@ -66,9 +66,9 @@ Para facilitar la búsqueda de información y tener un control detallado sobre l
     }
   }
 }
-
+```
 - [ ] Respuesta cuando no hay inmuebles:
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -83,9 +83,9 @@ Para facilitar la búsqueda de información y tener un control detallado sobre l
     }
   }
 }
-
+```
 - [ ] Respuesta de error por filtro inválido:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -96,7 +96,7 @@ Para facilitar la búsqueda de información y tener un control detallado sobre l
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -139,8 +139,8 @@ Para facilitar la búsqueda de información y tener un control detallado sobre l
 
 - URL: GET /api/v1/inmuebles?torre=A&estado=ocupado&page=1&limit=10
 
-📤 Ejemplo de Respuesta JSON Exitosa (200 OK)
-
+## 📤 Ejemplo de Respuesta JSON Exitosa (200 OK)
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -182,9 +182,9 @@ Para facilitar la búsqueda de información y tener un control detallado sobre l
     }
   }
 }
-
-📤 Ejemplo de Respuesta JSON Error (403 Forbidden)
-
+```
+## 📤 Ejemplo de Respuesta JSON Error (403 Forbidden)
+```json
 {
   "success": false,
   "statusCode": 403,

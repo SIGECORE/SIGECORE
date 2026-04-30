@@ -63,9 +63,9 @@ Para estar al día de las noticias del conjunto sin necesidad de revisar cartele
     ]
   }
 }
-
+```
 - [ ] Respuesta cuando no hay comunicados activos:
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -74,7 +74,7 @@ Para estar al día de las noticias del conjunto sin necesidad de revisar cartele
     "comunicados": []
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -108,7 +108,7 @@ Para estar al día de las noticias del conjunto sin necesidad de revisar cartele
 - Autenticación requerida: Sí (residente o administrador)
 
 ## 📤 Ejemplo de Respuesta JSON Exitosa (200 OK)
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -144,9 +144,9 @@ Para estar al día de las noticias del conjunto sin necesidad de revisar cartele
     ]
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON (sin comunicados)
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -155,9 +155,9 @@ Para estar al día de las noticias del conjunto sin necesidad de revisar cartele
     "comunicados": []
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (401 Unauthorized)
-
+```json
 {
   "success": false,
   "statusCode": 401,
@@ -168,7 +168,7 @@ Para estar al día de las noticias del conjunto sin necesidad de revisar cartele
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional

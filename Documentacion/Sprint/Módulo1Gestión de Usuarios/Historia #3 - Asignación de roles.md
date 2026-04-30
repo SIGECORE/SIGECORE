@@ -17,7 +17,7 @@ Para controlar quién puede realizar acciones administrativas como aprobar reser
 - Se retorna una respuesta JSON con código 200 OK y los datos actualizados del usuario.
 
 ## ✅ Criterios de Aceptación
-## 1. 🔍 Estructura y lógica del servicio
+### 1. 🔍 Estructura y lógica del servicio
 - [ ] Se expone un endpoint PATCH /api/v1/usuarios/{id}/rol para asignación de roles.
 - [ ] Se valida que el usuario autenticado sea administrador (id_rol = 1).
 - [ ] Se valida que el usuario a modificar exista en la tabla usuarios.
@@ -25,7 +25,7 @@ Para controlar quién puede realizar acciones administrativas como aprobar reser
 - [ ] Se valida que un administrador no pueda cambiarse su propio rol (para evitar perder acceso).
 - [ ] Se registra la auditoría del cambio de rol.
 
-## 2. 📤 Estructura de la información
+### 2. 📤 Estructura de la información
 - [ ] Se responde con la siguiente estructura en JSON para asignación exitosa:
 ```json
 {
@@ -41,8 +41,9 @@ Para controlar quién puede realizar acciones administrativas como aprobar reser
     "actualizado_por": "Juan Pérez (ID: 1)"
   }
 }
-
+```
 - [ ] Respuesta de error por usuario no autenticado:
+```json
 {
   "success": false,
   "statusCode": 401,
@@ -53,8 +54,9 @@ Para controlar quién puede realizar acciones administrativas como aprobar reser
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por permisos insuficientes:
+```json
 {
   "success": false,
   "statusCode": 403,
@@ -65,8 +67,9 @@ Para controlar quién puede realizar acciones administrativas como aprobar reser
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por usuario no encontrado:
+```json
 {
   "success": false,
   "statusCode": 404,
@@ -77,8 +80,9 @@ Para controlar quién puede realizar acciones administrativas como aprobar reser
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por rol inválido:
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -89,8 +93,9 @@ Para controlar quién puede realizar acciones administrativas como aprobar reser
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por auto-modificación:
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -101,7 +106,7 @@ Para controlar quién puede realizar acciones administrativas como aprobar reser
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 ## Reglas de negocio
 - Solo los administradores pueden asignar o modificar roles de otros usuarios.
@@ -138,11 +143,13 @@ Para controlar quién puede realizar acciones administrativas como aprobar reser
 # 📤 Ejemplo de Request
 - URL: PATCH /api/v1/usuarios/2/rol
 - Request Body:
+```json
 {
   "id_rol": 1
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Exitosa (200 OK)
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -156,8 +163,9 @@ Para controlar quién puede realizar acciones administrativas como aprobar reser
     "actualizado_por": "Juan Pérez (ID: 1)"
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (403 Forbidden)
+```json
 {
   "success": false,
   "statusCode": 403,
@@ -168,7 +176,7 @@ Para controlar quién puede realizar acciones administrativas como aprobar reser
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 ## 🔍 Casos de Prueba Funcional
 ## ✅ Caso 1: Asignación exitosa de rol a otro usuario

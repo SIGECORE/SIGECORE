@@ -47,9 +47,9 @@ Para que los residentes puedan conocer los espacios disponibles y las condicione
     "fecha_registro": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por zona duplicada:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -60,9 +60,9 @@ Para que los residentes puedan conocer los espacios disponibles y las condicione
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por capacidad inválida:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -73,9 +73,9 @@ Para que los residentes puedan conocer los espacios disponibles y las condicione
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por campo obligatorio faltante:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -86,7 +86,7 @@ Para que los residentes puedan conocer los espacios disponibles y las condicione
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -126,7 +126,7 @@ Para que los residentes puedan conocer los espacios disponibles y las condicione
 - Autenticación requerida: Sí (solo administradores)
 
 ## 📤 Ejemplo de Request JSON
-
+```json
 {
   "nombre": "Salón Social",
   "capacidad_maxima": 50,
@@ -134,9 +134,9 @@ Para que los residentes puedan conocer los espacios disponibles y las condicione
   "horario_inicio": "08:00",
   "horario_fin": "22:00"
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Exitosa (201 Created)
-
+```json
 {
   "success": true,
   "statusCode": 201,
@@ -152,9 +152,9 @@ Para que los residentes puedan conocer los espacios disponibles y las condicione
     "fecha_registro": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (400 Bad Request)
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -165,7 +165,7 @@ Para que los residentes puedan conocer los espacios disponibles y las condicione
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional

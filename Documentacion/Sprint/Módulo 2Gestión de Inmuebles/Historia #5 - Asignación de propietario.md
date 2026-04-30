@@ -51,9 +51,9 @@ Para saber quién es el responsable del pago de cuotas de administración y las 
     }
   }
 }
-
+```
 - [ ] Respuesta de error por inmueble no encontrado:
-
+```json
 {
   "success": false,
   "statusCode": 404,
@@ -64,9 +64,9 @@ Para saber quién es el responsable del pago de cuotas de administración y las 
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por propietario no encontrado:
-
+```json
 {
   "success": false,
   "statusCode": 404,
@@ -77,9 +77,9 @@ Para saber quién es el responsable del pago de cuotas de administración y las 
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 - [ ] Respuesta de error por inmueble ya tiene propietario:
-
+```
 {
   "success": false,
   "statusCode": 400,
@@ -90,7 +90,7 @@ Para saber quién es el responsable del pago de cuotas de administración y las 
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -141,13 +141,13 @@ Para saber quién es el responsable del pago de cuotas de administración y las 
 
 - URL: PATCH /api/v1/inmuebles/1/propietario
 - Request Body:
-
+```json
 {
   "id_propietario": 5
 }
-
-📤 Ejemplo de Respuesta JSON Exitosa (200 OK)
-
+```
+## 📤 Ejemplo de Respuesta JSON Exitosa (200 OK)
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -166,9 +166,9 @@ Para saber quién es el responsable del pago de cuotas de administración y las 
     }
   }
 }
-
-📤 Ejemplo de Respuesta JSON Error (404 Not Found)
-
+```
+## 📤 Ejemplo de Respuesta JSON Error (404 Not Found)
+```json
 {
   "success": false,
   "statusCode": 404,
@@ -179,7 +179,7 @@ Para saber quién es el responsable del pago de cuotas de administración y las 
     "timestamp": "2026-04-28T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional

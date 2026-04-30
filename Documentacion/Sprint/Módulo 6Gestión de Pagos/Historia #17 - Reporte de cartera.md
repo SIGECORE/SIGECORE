@@ -78,9 +78,9 @@ Para identificar a los morosos, enviar recordatorios de pago y tomar decisiones 
     ]
   }
 }
-
+```
 - [ ] Respuesta cuando no hay morosos:
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -92,9 +92,9 @@ Para identificar a los morosos, enviar recordatorios de pago y tomar decisiones 
     "cartera": []
   }
 }
-
+```
 - [ ] Respuesta de error por filtro inválido:
-
+```json
 {
   "success": false,
   "statusCode": 400,
@@ -105,7 +105,7 @@ Para identificar a los morosos, enviar recordatorios de pago y tomar decisiones 
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🔧 Notas Técnicas
 
 ## Reglas de negocio
@@ -142,7 +142,7 @@ Para identificar a los morosos, enviar recordatorios de pago y tomar decisiones 
 - URL: GET /api/v1/pagos/reporte-cartera?torre=A&meses_mora=3
 
 ## 📤 Ejemplo de Respuesta JSON Exitosa (200 OK)
-
+```json
 {
   "success": true,
   "statusCode": 200,
@@ -173,9 +173,9 @@ Para identificar a los morosos, enviar recordatorios de pago y tomar decisiones 
     ]
   }
 }
-
+```
 ## 📤 Ejemplo de Respuesta JSON Error (403 Forbidden)
-
+```json
 {
   "success": false,
   "statusCode": 403,
@@ -186,7 +186,7 @@ Para identificar a los morosos, enviar recordatorios de pago y tomar decisiones 
     "timestamp": "2026-04-29T10:30:00Z"
   }
 }
-
+```
 ## 🧪 Requisitos de Pruebas
 
 ## 🔍 Casos de Prueba Funcional
