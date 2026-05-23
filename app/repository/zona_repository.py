@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models import ZonaComun  # Asumiendo que tienes el modelo SQLAlchemy
+from app.models import ZonaComun
 
 class ZonaRepository:
     def __init__(self, db: Session):

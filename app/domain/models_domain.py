@@ -2,6 +2,9 @@ from pydantic import BaseModel
 from datetime import time, datetime
 from typing import Optional
 
+# ... tus modelos existentes aquí ...
+
+# Añadir este modelo al final:
 class ZonaComunDomain(BaseModel):
     id_zona: Optional[int] = None
     nombre: str

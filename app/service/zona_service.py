@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from repository.zona_repository import ZonaRepository
-from domain.models_domain import ZonaComunDomain
+from app.repository.zona_repository import ZonaRepository
+from app.domain.models_domain import ZonaComunDomain
 from datetime import datetime
 
 class ZonaService:
@@ -35,7 +35,7 @@ class ZonaService:
                 }
             }
 
-        # Preparar datos
+        # Crear zona
         nueva_zona = ZonaComunDomain(
             nombre=zona_data["nombre"],
             capacidad_maxima=zona_data["capacidad_maxima"],
@@ -57,7 +57,7 @@ class ZonaService:
                 "nombre": zona_creada.nombre,
                 "capacidad_maxima": zona_creada.capacidad_maxima,
                 "descripcion": zona_creada.descripcion,
-                "estado": zona_creada.estado,
+                "estado": zona_creada.estado.value if hasattr(zona_creada.estado, 'value') else zona_creada.estado,
                 "horario_inicio": zona_creada.horario_inicio.isoformat() if zona_creada.horario_inicio else None,
                 "horario_fin": zona_creada.horario_fin.isoformat() if zona_creada.horario_fin else None,
                 "fecha_registro": zona_creada.fecha_registro.isoformat() + "Z"
