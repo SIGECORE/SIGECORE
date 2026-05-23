@@ -1,5 +1,4 @@
-# api/router.py
-from typing import List
+# api/v1/router.py
 from fastapi import APIRouter, status, Request, HTTPException
 import jwt
 
@@ -29,16 +28,6 @@ service = InmuebleService(repo)
 router = APIRouter(prefix="/inmuebles", tags=["inmuebles"])
 
 
-@router.get("/", response_model=List[Inmueble])
-def list_inmuebles():
-    return service.get_all_inmuebles()
-
-
-@router.get("/{inmueble_id}", response_model=Inmueble)
-def get_inmueble(inmueble_id: int):
-    return service.get_inmueble(inmueble_id)
-
-
 @router.post("/", response_model=Inmueble, status_code=status.HTTP_201_CREATED)
 def create_inmueble(data: InmuebleCreate, request: Request):
     
@@ -59,8 +48,3 @@ def create_inmueble(data: InmuebleCreate, request: Request):
         )
     
     return service.create_inmueble(data, usuario)
-
-
-@router.delete("/{inmueble_id}", status_code=status.HTTP_200_OK)
-def delete_inmueble(inmueble_id: int):
-    return service.delete_inmueble(inmueble_id)

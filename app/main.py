@@ -2,7 +2,6 @@
 from fastapi import FastAPI
 from api.v1.router import router
 
-
 app = FastAPI(
     title="SIGECORE API",
     description="API REST para gestión de conjuntos residenciales",
@@ -10,7 +9,6 @@ app = FastAPI(
 )
 
 app.include_router(router)
-
 
 @app.get("/")
 def root():
