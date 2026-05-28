@@ -6,3 +6,11 @@ __pycache__/
 .Python
 *.so
 *.exe
+venv/ 
+Documentacion/ 
+_pycache_/ 
+*.pyc 
+*.db 
+.env.example 
+Comandos Github 
+app_backup/ 
