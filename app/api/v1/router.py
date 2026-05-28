@@ -1,14 +1,10 @@
 # app/api/v1/router.py
-from typing import Optional
-from fastapi import APIRouter, status, Request, HTTPException, Depends, Query
+from fastapi import APIRouter, Request, HTTPException, Depends
 from sqlalchemy.orm import Session
 import jwt
 
 from database import get_db
-from schemas import (
-    InmuebleCreate, InmuebleResponse, AsignarPropietarioRequest,
-    ListaInmueblesResponse
-)
+from schemas import AsignarPropietarioRequest, InmuebleResponse
 from service.inmueble_service import InmuebleService
 from repository.inmueble_repository import InmuebleRepository
 
@@ -31,54 +27,6 @@ def validar_token(token: str) -> dict:
 router = APIRouter(prefix="/inmuebles", tags=["inmuebles"])
 
 
-@router.post("/", response_model=InmuebleResponse, status_code=status.HTTP_201_CREATED)
-def create_inmueble(data: InmuebleCreate, request: Request, db: Session = Depends(get_db)):
-    
-    auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token de autenticación requerido"
-        )
-    
-    token = auth_header.split(" ")[1] if " " in auth_header else auth_header
-    usuario = validar_token(token)
-    
-    if not usuario:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token inválido o expirado"
-        )
-    
-    repo = InmuebleRepository(db)
-    service = InmuebleService(repo)
-    return service.create_inmueble(data, usuario)
-
-
-@router.get("/", response_model=ListaInmueblesResponse)
-def listar_inmuebles(
-    request: Request,
-    torre: Optional[str] = Query(None),
-    estado: Optional[str] = Query(None),
-    nombre_propietario: Optional[str] = Query(None),
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
-    db: Session = Depends(get_db)
-):
-    auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        raise HTTPException(status_code=401, detail="Token requerido")
-    
-    token = auth_header.split(" ")[1]
-    usuario = validar_token(token)
-    if not usuario:
-        raise HTTPException(status_code=401, detail="Token inválido")
-    
-    repo = InmuebleRepository(db)
-    service = InmuebleService(repo)
-    return service.listar_inmuebles(usuario, torre, estado, nombre_propietario, page, limit)
-
-
 @router.patch("/{inmueble_id}/propietario", response_model=InmuebleResponse)
 def asignar_propietario(
     inmueble_id: int, 
@@ -88,12 +36,19 @@ def asignar_propietario(
 ):
     auth_header = request.headers.get("Authorization")
     if not auth_header:
-        raise HTTPException(status_code=401, detail="Token requerido")
+        raise HTTPException(
+            status_code=401,
+            detail="Token de autenticación requerido"
+        )
     
-    token = auth_header.split(" ")[1]
+    token = auth_header.split(" ")[1] if " " in auth_header else auth_header
     usuario = validar_token(token)
+    
     if not usuario:
-        raise HTTPException(status_code=401, detail="Token inválido")
+        raise HTTPException(
+            status_code=401,
+            detail="Token inválido o expirado"
+        )
     
     repo = InmuebleRepository(db)
     service = InmuebleService(repo)

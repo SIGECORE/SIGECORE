@@ -3,8 +3,8 @@ from fastapi import FastAPI
 from api.v1.router import router
 from database import engine
 from models import Base
+from api.v1.router import router
 
-# Crear todas las tablas en la base de datos
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
@@ -18,3 +18,7 @@ app.include_router(router)
 @app.get("/")
 def root():
     return {"message": "¡API de SIGECORE funcionando! 🚀"}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
