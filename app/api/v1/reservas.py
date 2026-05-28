@@ -3,139 +3,44 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 from typing import Optional
 from app.database import get_db
-from app.service.reserva_admin_service import ReservaAdminService
-from app.domain.reserva_admin_domain import ReservaAdminDomain, ErrorCode
-from app.schemas import ReservasPendientesResponse, CambioEstadoRequest, CambioEstadoResponse
+from app.service.cancelacion_service import CancelacionService
+from app.domain.cancelacion_domain import CancelacionDomain, ErrorCode
+from app.schemas import CancelacionResponse
 
 router = APIRouter(tags=["Reservas"])
 
 # Temporal - Reemplazar con autenticación real
 async def get_current_user(token: Optional[str] = None):
-    # Simular usuario administrador
-    return {"id": 1, "nombre": "Admin Test", "email": "admin@test.com", "rol": "administrador"}
+    # Simular usuario residente (cambiar a administrador para pruebas)
+    return {"id": 1, "nombre": "Carlos Rodríguez", "email": "carlos@test.com", "rol": "residente"}
 
-# ==================== GET /api/v1/reservas/pendientes ====================
+# ==================== DELETE /api/v1/reservas/{id} ====================
 
-@router.get("/reservas/pendientes", response_model=ReservasPendientesResponse)
-async def listar_reservas_pendientes(
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
-):
-    """
-    Lista todas las solicitudes de reserva pendientes.
-    Requiere rol de administrador.
-    """
-    
-    # Validar que sea administrador
-    error = ReservaAdminDomain.validar_administrador(current_user)
-    if error:
-        status_code, error_code, error_detail = error
-        raise HTTPException(
-            status_code=status_code,
-            detail={
-                "success": False,
-                "statusCode": status_code,
-                "message": "Acceso denegado",
-                "error": {
-                    "error_code": error_code,
-                    "details": error_detail["details"],
-                    "timestamp": datetime.now().isoformat() + "Z"
-                }
-            }
-        )
-    
-    try:
-        service = ReservaAdminService(db)
-        reservas_pendientes = service.listar_reservas_pendientes()
-        
-        return ReservasPendientesResponse(
-            success=True,
-            statusCode=200,
-            message="Consulta exitosa",
-            data={"pendientes": reservas_pendientes}
-        )
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={
-                "success": False,
-                "statusCode": 500,
-                "message": "Error interno del servidor",
-                "error": {
-                    "error_code": "ERROR_INTERNO",
-                    "details": str(e),
-                    "timestamp": datetime.now().isoformat() + "Z"
-                }
-            }
-        )
-
-# ==================== PATCH /api/v1/reservas/{id}/estado ====================
-
-@router.patch("/reservas/{reserva_id}/estado", response_model=CambioEstadoResponse)
-async def cambiar_estado_reserva(
+@router.delete("/reservas/{reserva_id}", response_model=CancelacionResponse)
+async def cancelar_reserva(
     reserva_id: int,
-    request: CambioEstadoRequest,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Aprueba o rechaza una reserva pendiente.
-    Requiere rol de administrador.
+    Cancela una reserva existente.
     
-    - **estado**: "aprobada" o "rechazada"
+    - Residentes: Solo pueden cancelar sus propias reservas con al menos 24 horas de anticipación
+    - Administradores: Pueden cancelar cualquier reserva sin restricción de tiempo
     """
     
-    # Validar que sea administrador
-    error = ReservaAdminDomain.validar_administrador(current_user)
-    if error:
-        status_code, error_code, error_detail = error
-        raise HTTPException(
-            status_code=status_code,
-            detail={
-                "success": False,
-                "statusCode": status_code,
-                "message": "Acceso denegado",
-                "error": {
-                    "error_code": error_code,
-                    "details": error_detail["details"],
-                    "timestamp": datetime.now().isoformat() + "Z"
-                }
-            }
-        )
-    
-    # Validar estado válido
-    error = ReservaAdminDomain.validar_estado_valido(request.estado)
-    if error:
-        status_code, error_code, error_detail = error
-        raise HTTPException(
-            status_code=status_code,
-            detail={
-                "success": False,
-                "statusCode": status_code,
-                "message": "Estado inválido",
-                "error": {
-                    "error_code": error_code,
-                    "details": error_detail["details"],
-                    "timestamp": datetime.now().isoformat() + "Z"
-                }
-            }
-        )
-    
     try:
-        service = ReservaAdminService(db)
-        resultado = service.cambiar_estado_reserva(
+        service = CancelacionService(db)
+        resultado = service.cancelar_reserva(
             reserva_id=reserva_id,
-            nuevo_estado=request.estado,
-            administrador_id=current_user["id"]
+            usuario_id=current_user["id"],
+            usuario_rol=current_user["rol"]
         )
         
-        mensaje = f"Reserva {request.estado} exitosamente"
-        
-        return CambioEstadoResponse(
+        return CancelacionResponse(
             success=True,
             statusCode=200,
-            message=mensaje,
+            message="Reserva cancelada exitosamente",
             data=resultado
         )
         
@@ -156,7 +61,21 @@ async def cambiar_estado_reserva(
                     }
                 }
             )
-        elif error_str == ErrorCode.RESERVA_NO_PENDIENTE:
+        elif error_str == ErrorCode.NO_AUTORIZADO:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "success": False,
+                    "statusCode": 403,
+                    "message": "No autorizado",
+                    "error": {
+                        "error_code": ErrorCode.NO_AUTORIZADO,
+                        "details": "No tiene permiso para cancelar esta reserva",
+                        "timestamp": datetime.now().isoformat() + "Z"
+                    }
+                }
+            )
+        elif error_str == ErrorCode.RESERVA_YA_CANCELADA:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
@@ -164,22 +83,50 @@ async def cambiar_estado_reserva(
                     "statusCode": 400,
                     "message": "Error en la solicitud",
                     "error": {
-                        "error_code": ErrorCode.RESERVA_NO_PENDIENTE,
-                        "details": "La reserva ya fue procesada anteriormente",
+                        "error_code": ErrorCode.RESERVA_YA_CANCELADA,
+                        "details": "La reserva ya se encuentra cancelada",
                         "timestamp": datetime.now().isoformat() + "Z"
                     }
                 }
             )
-        elif error_str == ErrorCode.RESERVA_CONFLICTO:
+        elif error_str == ErrorCode.RESERVA_RECHAZADA:
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
                     "success": False,
-                    "statusCode": 409,
-                    "message": "Conflicto de horario",
+                    "statusCode": 400,
+                    "message": "Error en la solicitud",
                     "error": {
-                        "error_code": ErrorCode.RESERVA_CONFLICTO,
-                        "details": "La zona ya está reservada en el horario solicitado",
+                        "error_code": ErrorCode.RESERVA_RECHAZADA,
+                        "details": "No se puede cancelar una reserva que ya fue rechazada",
+                        "timestamp": datetime.now().isoformat() + "Z"
+                    }
+                }
+            )
+        elif error_str == ErrorCode.FECHA_PASADA:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "success": False,
+                    "statusCode": 400,
+                    "message": "No se puede cancelar la reserva",
+                    "error": {
+                        "error_code": ErrorCode.FECHA_PASADA,
+                        "details": "No se puede cancelar una reserva con fecha pasada",
+                        "timestamp": datetime.now().isoformat() + "Z"
+                    }
+                }
+            )
+        elif error_str == ErrorCode.CANCELACION_TARDIA:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "success": False,
+                    "statusCode": 400,
+                    "message": "No se puede cancelar la reserva",
+                    "error": {
+                        "error_code": ErrorCode.CANCELACION_TARDIA,
+                        "details": "Las reservas solo se pueden cancelar con al menos 24 horas de anticipación",
                         "timestamp": datetime.now().isoformat() + "Z"
                     }
                 }

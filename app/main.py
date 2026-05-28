@@ -34,8 +34,7 @@ def read_root():
         "message": "API de Zonas Comunes",
         "version": "1.0.0",
         "endpoints": {
-            "reservas_pendientes": "GET /api/v1/reservas/pendientes",
-            "cambiar_estado": "PATCH /api/v1/reservas/{id}/estado",
+            "cancelar_reserva": "DELETE /api/v1/reservas/{id}",
             "docs": "GET /docs"
         }
     }

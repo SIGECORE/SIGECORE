@@ -36,6 +36,7 @@ class Usuario(Base):
     
     reservas = relationship("Reserva", foreign_keys="Reserva.usuario_id", back_populates="usuario")
     reservas_aprobadas = relationship("Reserva", foreign_keys="Reserva.aprobado_por", back_populates="aprobador")
+    reservas_canceladas = relationship("Reserva", foreign_keys="Reserva.cancelado_por", back_populates="cancelador")
 
 # ==================== Modelo ZonaComun ====================
 
@@ -66,7 +67,10 @@ class Reserva(Base):
     fecha_solicitud = Column(DateTime, default=datetime.now)
     fecha_aprobacion = Column(DateTime, nullable=True)
     aprobado_por = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
+    fecha_cancelacion = Column(DateTime, nullable=True)
+    cancelado_por = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
     
     zona = relationship("ZonaComun", back_populates="reservas")
     usuario = relationship("Usuario", foreign_keys=[usuario_id], back_populates="reservas")
     aprobador = relationship("Usuario", foreign_keys=[aprobado_por], back_populates="reservas_aprobadas")
+    cancelador = relationship("Usuario", foreign_keys=[cancelado_por], back_populates="reservas_canceladas")
