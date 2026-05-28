@@ -4,7 +4,7 @@ from app.api.v1.router import router
 
 app = FastAPI(
     title="SIGECORE API",
-    description="API REST para registro de usuarios en el sistema SIGECORE",
+    description="API REST para el inicio de sesión de usuarios en SIGECORE",
     version="1.0.0"
 )
 
