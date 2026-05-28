@@ -19,7 +19,11 @@ ALGORITHM = "HS256"
 
 class UsuarioService:
 
-    def __init__(self, repo: UsuarioRepository):
+    def __init__(
+        self,
+        repo: UsuarioRepository
+    ):
+
         self.repo = repo
 
     def login(
@@ -27,12 +31,16 @@ class UsuarioService:
         data: UsuarioLogin
     ):
 
+        # ===== DEPENDENCIA DE HU-001 =====
+        # Solo usuarios registrados pueden iniciar sesión
+
         email = data.email.lower()
 
         usuario = self.repo.buscar_por_email(email)
 
         # Usuario no existe
         if not usuario:
+
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail={
@@ -53,6 +61,7 @@ class UsuarioService:
 
         # Usuario inactivo
         if not usuario.activo:
+
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail={
@@ -76,6 +85,7 @@ class UsuarioService:
             usuario.bloqueado_hasta
             and usuario.bloqueado_hasta > datetime.utcnow()
         ):
+
             raise HTTPException(
                 status_code=status.HTTP_423_LOCKED,
                 detail={
@@ -94,12 +104,13 @@ class UsuarioService:
                 }
             )
 
-        # Verificar password
+        # Validar password
         password_correcto = bcrypt.checkpw(
             data.password.encode("utf-8"),
             usuario.password_hash.encode("utf-8")
         )
 
+        # Password incorrecto
         if not password_correcto:
 
             nuevos_intentos = (
@@ -111,11 +122,12 @@ class UsuarioService:
                 nuevos_intentos
             )
 
-            # Bloquear después de 3 intentos
+            # Bloqueo después de 3 intentos
             if nuevos_intentos >= 3:
 
                 bloqueo = (
-                    datetime.utcnow() + timedelta(minutes=30)
+                    datetime.utcnow()
+                    + timedelta(minutes=30)
                 )
 
                 self.repo.bloquear_usuario(
@@ -130,7 +142,9 @@ class UsuarioService:
                         "statusCode": 423,
                         "message": "Cuenta bloqueada",
                         "error": {
-                            "error_code": "CUENTA_BLOQUEADA",
+                            "error_code": (
+                                "CUENTA_BLOQUEADA"
+                            ),
                             "details": (
                                 "Cuenta bloqueada por 30 minutos"
                             ),
@@ -148,7 +162,9 @@ class UsuarioService:
                     "statusCode": 401,
                     "message": "Credenciales inválidas",
                     "error": {
-                        "error_code": "CREDENCIALES_INVALIDAS",
+                        "error_code": (
+                            "CREDENCIALES_INVALIDAS"
+                        ),
                         "details": (
                             "El correo o la contraseña son incorrectos"
                         ),
@@ -162,12 +178,12 @@ class UsuarioService:
         # Resetear intentos
         self.repo.resetear_intentos(usuario)
 
-        # Actualizar último login
+        # Actualizar login
         self.repo.actualizar_ultimo_login(usuario)
 
-        # JWT
         fecha_actual = datetime.utcnow()
 
+        # ===== JWT =====
         payload = {
             "id_usuario": usuario.id_usuario,
             "nombre_completo": usuario.nombre_completo,

@@ -1,45 +1,37 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
 
-class UsuarioLogin(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class UsuarioToken(BaseModel):
-    token: str
-
-
-class UsuarioResponse(BaseModel):
-    id_usuario: int
-    nombre_completo: str
-    email: str
-    id_rol: int
-    rol_nombre: str
-
-
-class LoginResponse(BaseModel):
-    success: bool
-    statusCode: int
-    message: str
-    data: dict
-
-
 class Usuario(BaseModel):
+
     id_usuario: int
     nombre_completo: str
     email: str
-    telefono: str
-    password_hash: str
+    telefono: Optional[str] = None
     id_rol: int
     rol_nombre: str
     activo: bool
-    fecha_registro: datetime
+    password_hash: str
     intentos_fallidos: int = 0
     bloqueado_hasta: Optional[datetime] = None
     ultimo_login: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+
+class UsuarioCreate(BaseModel):
+
+    nombre_completo: str
+    email: str
+    telefono: str
+    password: str
+    id_rol: int
+
+
+# ===== DEPENDENCIA HISTORIA 1 =====
+# Este modelo viene de HU-001
+# porque login necesita usuarios registrados
+
+class UsuarioLogin(BaseModel):
+
+    email: str
+    password: str
