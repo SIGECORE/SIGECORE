@@ -1,4 +1,4 @@
-# app/domain/models_domain.py
+# app/schemas.py
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
@@ -11,18 +11,21 @@ class EstadoPago(str, Enum):
     PENDIENTE = "pendiente"
 
 
+# Usuario Schemas
 class UsuarioInfo(BaseModel):
     id_usuario: int
     nombre_completo: str
     email: str
 
 
+# Inmueble Schemas
 class InmuebleInfo(BaseModel):
     id_inmueble: int
     numero: str
     torre: str
 
 
+# Pago Schemas
 class PagoResponse(BaseModel):
     id_pago: int
     inmueble: InmuebleInfo
