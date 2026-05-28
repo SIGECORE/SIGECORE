@@ -1,31 +1,48 @@
 from pydantic import BaseModel, Field
 from datetime import date, time, datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
-# ==================== HU-009: Solicitud de Reserva ====================
+# ==================== HU-010: Aprobación de Reservas ====================
 
-class SolicitudReservaRequest(BaseModel):
-    id_zona: int = Field(..., description="ID de la zona común a reservar", example=1)
-    fecha: date = Field(..., description="Fecha de la reserva (YYYY-MM-DD)", example="2026-05-15")
-    hora_inicio: time = Field(..., description="Hora de inicio (HH:MM)", example="14:00")
-    hora_fin: time = Field(..., description="Hora de fin (HH:MM)", example="18:00")
-    observaciones: Optional[str] = Field(None, description="Observaciones adicionales", example="Cumpleaños familiar")
-
-class ReservaResponseData(BaseModel):
-    id_reserva: int
+class SolicitanteInfo(BaseModel):
     id_usuario: int
-    nombre_usuario: str
+    nombre: str
+    email: str
+    telefono: Optional[str] = None
+
+class ZonaInfo(BaseModel):
     id_zona: int
-    nombre_zona: str
+    nombre: str
+
+class ReservaPendienteData(BaseModel):
+    id_reserva: int
+    solicitante: SolicitanteInfo
+    zona: ZonaInfo
     fecha: date
     hora_inicio: time
     hora_fin: time
-    estado: str
+    observaciones: Optional[str] = None
     fecha_solicitud: datetime
 
-class SolicitudReservaResponse(BaseModel):
+class ReservasPendientesResponse(BaseModel):
     success: bool
     statusCode: int
     message: str
-    data: Optional[ReservaResponseData] = None
+    data: Optional[Dict[str, List[ReservaPendienteData]]] = None
+    error: Optional[Dict[str, Any]] = None
+
+class CambioEstadoRequest(BaseModel):
+    estado: str = Field(..., description="Nuevo estado de la reserva", example="aprobada")
+
+class ReservaEstadoResponseData(BaseModel):
+    id_reserva: int
+    estado: str
+    fecha_aprobacion: Optional[datetime] = None
+    aprobado_por: Optional[str] = None
+
+class CambioEstadoResponse(BaseModel):
+    success: bool
+    statusCode: int
+    message: str
+    data: Optional[ReservaEstadoResponseData] = None
     error: Optional[Dict[str, Any]] = None

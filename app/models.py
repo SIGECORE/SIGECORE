@@ -16,6 +16,10 @@ class EstadoReservaEnum(str, enum.Enum):
     RECHAZADA = "rechazada"
     CANCELADA = "cancelada"
 
+class RolEnum(str, enum.Enum):
+    ADMINISTRADOR = "administrador"
+    RESIDENTE = "residente"
+
 # ==================== Modelo Usuario ====================
 
 class Usuario(Base):
@@ -25,8 +29,13 @@ class Usuario(Base):
     nombre = Column(String(100), nullable=False)
     email = Column(String(100), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
+    telefono = Column(String(20), nullable=True)
+    rol = Column(String(20), default=RolEnum.RESIDENTE)
     activo = Column(Boolean, default=True)
     tiene_morosidad = Column(Boolean, default=False)
+    
+    reservas = relationship("Reserva", foreign_keys="Reserva.usuario_id", back_populates="usuario")
+    reservas_aprobadas = relationship("Reserva", foreign_keys="Reserva.aprobado_por", back_populates="aprobador")
 
 # ==================== Modelo ZonaComun ====================
 
@@ -59,5 +68,5 @@ class Reserva(Base):
     aprobado_por = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
     
     zona = relationship("ZonaComun", back_populates="reservas")
-    usuario = relationship("Usuario", foreign_keys=[usuario_id])
-    aprobador = relationship("Usuario", foreign_keys=[aprobado_por])
+    usuario = relationship("Usuario", foreign_keys=[usuario_id], back_populates="reservas")
+    aprobador = relationship("Usuario", foreign_keys=[aprobado_por], back_populates="reservas_aprobadas")

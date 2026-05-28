@@ -12,7 +12,7 @@ from app.api.v1.reservas import router as reservas_router
 # Crear aplicación FastAPI
 app = FastAPI(
     title="API de Zonas Comunes",
-    description="API para solicitud de reservas de zonas comunes",
+    description="API para gestión de reservas de zonas comunes",
     version="1.0.0"
 )
 
@@ -34,7 +34,8 @@ def read_root():
         "message": "API de Zonas Comunes",
         "version": "1.0.0",
         "endpoints": {
-            "reservas": "POST /api/v1/reservas",
+            "reservas_pendientes": "GET /api/v1/reservas/pendientes",
+            "cambiar_estado": "PATCH /api/v1/reservas/{id}/estado",
             "docs": "GET /docs"
         }
     }
