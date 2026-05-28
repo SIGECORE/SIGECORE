@@ -1,9 +1,22 @@
-from sqlalchemy import Column, Integer, String, Date, Time, ForeignKey, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, Date, Time, ForeignKey, Boolean, Text, DateTime
 from sqlalchemy.orm import relationship
 from app.database import Base
 import enum
+from datetime import datetime
 
-# ==================== Modelos existentes (ajusta según lo que ya tenías) ====================
+# ==================== Enums ====================
+
+class EstadoZonaEnum(str, enum.Enum):
+    DISPONIBLE = "disponible"
+    MANTENIMIENTO = "mantenimiento"
+
+class EstadoReservaEnum(str, enum.Enum):
+    PENDIENTE = "pendiente"
+    APROBADA = "aprobada"
+    RECHAZADA = "rechazada"
+    CANCELADA = "cancelada"
+
+# ==================== Modelo Usuario ====================
 
 class Usuario(Base):
     __tablename__ = "usuarios"
@@ -12,19 +25,10 @@ class Usuario(Base):
     nombre = Column(String(100), nullable=False)
     email = Column(String(100), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
-    
-    reservas = relationship("Reserva", back_populates="usuario")
+    activo = Column(Boolean, default=True)
+    tiene_morosidad = Column(Boolean, default=False)
 
-# ==================== HU-008: Modelos para Disponibilidad ====================
-
-class EstadoZonaEnum(str, enum.Enum):
-    DISPONIBLE = "disponible"
-    MANTENIMIENTO = "mantenimiento"
-
-class EstadoReservaEnum(str, enum.Enum):
-    APROBADA = "aprobada"
-    PENDIENTE = "pendiente"
-    CANCELADA = "cancelada"
+# ==================== Modelo ZonaComun ====================
 
 class ZonaComun(Base):
     __tablename__ = "zonas_comunes"
@@ -33,9 +37,11 @@ class ZonaComun(Base):
     nombre = Column(String(100), nullable=False)
     descripcion = Column(String(255), nullable=True)
     capacidad = Column(Integer, nullable=True)
-    estado = Column(SQLEnum(EstadoZonaEnum), default=EstadoZonaEnum.DISPONIBLE)
+    estado = Column(String(20), default=EstadoZonaEnum.DISPONIBLE)
     
     reservas = relationship("Reserva", back_populates="zona")
+
+# ==================== Modelo Reserva ====================
 
 class Reserva(Base):
     __tablename__ = "reservas"
@@ -46,7 +52,12 @@ class Reserva(Base):
     fecha = Column(Date, nullable=False)
     hora_inicio = Column(Time, nullable=False)
     hora_fin = Column(Time, nullable=False)
-    estado = Column(SQLEnum(EstadoReservaEnum), default=EstadoReservaEnum.PENDIENTE)
+    estado = Column(String(20), default=EstadoReservaEnum.PENDIENTE)
+    observaciones = Column(Text, nullable=True)
+    fecha_solicitud = Column(DateTime, default=datetime.now)
+    fecha_aprobacion = Column(DateTime, nullable=True)
+    aprobado_por = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
     
     zona = relationship("ZonaComun", back_populates="reservas")
-    usuario = relationship("Usuario", back_populates="reservas")
+    usuario = relationship("Usuario", foreign_keys=[usuario_id])
+    aprobador = relationship("Usuario", foreign_keys=[aprobado_por])

@@ -1,15 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.api.v1 import disponibilidad
+from datetime import datetime
 
 # Crear tablas en la base de datos
 Base.metadata.create_all(bind=engine)
 
+# Importar router de reservas
+from app.api.v1.reservas import router as reservas_router
+
 # Crear aplicación FastAPI
 app = FastAPI(
     title="API de Zonas Comunes",
-    description="API para gestión de reservas de zonas comunes",
+    description="API para solicitud de reservas de zonas comunes",
     version="1.0.0"
 )
 
@@ -22,8 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Registrar routers
-app.include_router(disponibilidad.router, prefix="/api/v1")
+# Registrar router
+app.include_router(reservas_router)
 
 @app.get("/")
 def read_root():
@@ -31,10 +34,11 @@ def read_root():
         "message": "API de Zonas Comunes",
         "version": "1.0.0",
         "endpoints": {
-            "disponibilidad": "/api/v1/zonas/disponibilidad"
+            "reservas": "POST /api/v1/reservas",
+            "docs": "GET /docs"
         }
     }
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy"}
+    return {"status": "healthy", "timestamp": datetime.now().isoformat() + "Z"}
