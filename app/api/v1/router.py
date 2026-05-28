@@ -1,9 +1,11 @@
 # app/api/v1/router.py
 from typing import Optional
-from fastapi import APIRouter, status, Request, HTTPException, Query
+from fastapi import APIRouter, status, Request, HTTPException, Depends, Query
+from sqlalchemy.orm import Session
 import jwt
 
-from domain.models_domain import ListaInmueblesResponse
+from database import get_db
+from schemas import ListaInmueblesResponse
 from service.inmueble_service import InmuebleService
 from repository.inmueble_repository import InmuebleRepository
 
@@ -23,22 +25,20 @@ def validar_token(token: str) -> dict:
         return None
 
 
-repo = InmuebleRepository()
-service = InmuebleService(repo)
-
 router = APIRouter(prefix="/inmuebles", tags=["inmuebles"])
 
 
-@router.get("/", response_model=ListaInmueblesResponse, status_code=status.HTTP_200_OK)
+# SOLO EL MÉTODO GET PARA HU-006
+@router.get("/", response_model=ListaInmueblesResponse)
 def listar_inmuebles(
     request: Request,
     torre: Optional[str] = Query(None, description="Filtrar por torre"),
     estado: Optional[str] = Query(None, description="Filtrar por estado (disponible, ocupado, mantenimiento)"),
-    nombre_propietario: Optional[str] = Query(None, description="Filtrar por nombre del propietario (búsqueda parcial)"),
+    nombre_propietario: Optional[str] = Query(None, description="Filtrar por nombre del propietario"),
     page: int = Query(1, ge=1, description="Número de página"),
-    limit: int = Query(10, ge=1, le=100, description="Elementos por página")
+    limit: int = Query(10, ge=1, le=100, description="Elementos por página"),
+    db: Session = Depends(get_db)
 ):
-    
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         raise HTTPException(
@@ -55,4 +55,6 @@ def listar_inmuebles(
             detail="Token inválido o expirado"
         )
     
+    repo = InmuebleRepository(db)
+    service = InmuebleService(repo)
     return service.listar_inmuebles(usuario, torre, estado, nombre_propietario, page, limit)
