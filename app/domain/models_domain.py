@@ -1,36 +1,23 @@
 # domain/models_domain.py
-
 from pydantic import BaseModel
+from typing import Optional, List
 from datetime import datetime
-from typing import Optional
 
 
-class Usuario(BaseModel):
-
-    id_usuario: int
-    nombre_completo: str
-    email: str
-    telefono: str
-    password_hash: str
-    id_rol: int
-    rol_nombre: str
-    activo: bool = True
-    fecha_registro: datetime
-
-    class Config:
-        from_attributes = True
+class ComunicadoCreate(BaseModel):
+    titulo: str
+    contenido: str
+    archivos_adjuntos: Optional[List[str]] = []
+    fecha_expiracion: Optional[datetime] = None
 
 
-class CambiarRolRequest(BaseModel):
-    id_rol: int
-
-
-class AuditoriaRol(BaseModel):
-
-    id_auditoria: int
-    id_usuario_modificado: int
-    rol_anterior: int
-    rol_nuevo: int
-    id_usuario_modificador: int
-    fecha_modificacion: datetime
-    ip_origen: Optional[str] = None
+class Comunicado(BaseModel):
+    id_comunicado: int
+    titulo: str
+    contenido: str
+    id_autor: int
+    autor_nombre: str
+    archivos_adjuntos: List[str]
+    fecha_publicacion: datetime
+    fecha_expiracion: Optional[datetime]
+    activo: bool

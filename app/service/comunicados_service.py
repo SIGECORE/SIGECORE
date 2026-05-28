@@ -2,30 +2,30 @@
 from fastapi import HTTPException, status
 from datetime import datetime
 
-from app.repository.rol_repository import RolRepository
+from app.repository.comunicados_repository import (
+    ComunicadosRepository
+)
+
 from app.domain.models_domain import (
-    CambiarRolRequest
+    ComunicadoCreate
 )
 
 
-class RolService:
+class ComunicadosService:
 
     def __init__(
         self,
-        repo: RolRepository
+        repo: ComunicadosRepository
     ):
-
         self.repo = repo
 
-    def cambiar_rol(
+    def create_comunicado(
         self,
-        id_usuario: int,
-        data: CambiarRolRequest,
-        usuario_autenticado: dict,
-        ip_origen: str | None = None
+        data: ComunicadoCreate,
+        usuario_autenticado: dict
     ):
 
-        # Validar admin
+        # Validar administrador
         if usuario_autenticado.get("id_rol") != 1:
 
             raise HTTPException(
@@ -38,7 +38,7 @@ class RolService:
                         "error_code": "ACCESO_DENEGADO",
                         "details": (
                             "Se requiere rol de administrador "
-                            "para realizar esta acción"
+                            "para publicar comunicados"
                         ),
                         "timestamp": (
                             datetime.utcnow().isoformat()
@@ -47,10 +47,52 @@ class RolService:
                 }
             )
 
-        # Validar auto modificación
+        # Validar título
+        if not data.titulo:
+
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "success": False,
+                    "statusCode": 400,
+                    "message": "Error en la solicitud",
+                    "error": {
+                        "error_code": "CAMPO_REQUERIDO",
+                        "details": (
+                            "El campo titulo es obligatorio"
+                        ),
+                        "timestamp": (
+                            datetime.utcnow().isoformat()
+                        )
+                    }
+                }
+            )
+
+        # Validar contenido
+        if not data.contenido:
+
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "success": False,
+                    "statusCode": 400,
+                    "message": "Error en la solicitud",
+                    "error": {
+                        "error_code": "CAMPO_REQUERIDO",
+                        "details": (
+                            "El campo contenido es obligatorio"
+                        ),
+                        "timestamp": (
+                            datetime.utcnow().isoformat()
+                        )
+                    }
+                }
+            )
+
+        # Validar fecha expiración
         if (
-            usuario_autenticado.get("id_usuario")
-            == id_usuario
+            data.fecha_expiracion
+            and data.fecha_expiracion < datetime.utcnow()
         ):
 
             raise HTTPException(
@@ -61,11 +103,11 @@ class RolService:
                     "message": "Error en la solicitud",
                     "error": {
                         "error_code": (
-                            "AUTO_MODIFICACION_NO_PERMITIDA"
+                            "FECHA_EXPIRACION_INVALIDA"
                         ),
                         "details": (
-                            "No puedes cambiar tu propio rol "
-                            "de administrador"
+                            "La fecha de expiración no puede "
+                            "ser anterior a la fecha actual"
                         ),
                         "timestamp": (
                             datetime.utcnow().isoformat()
@@ -74,71 +116,7 @@ class RolService:
                 }
             )
 
-        # Validar rol
-        if data.id_rol not in [1, 2]:
-
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "success": False,
-                    "statusCode": 400,
-                    "message": "Error en la solicitud",
-                    "error": {
-                        "error_code": "ROL_INVALIDO",
-                        "details": (
-                            "El rol debe ser 1 "
-                            "(administrador) "
-                            "o 2 (residente)"
-                        ),
-                        "timestamp": (
-                            datetime.utcnow().isoformat()
-                        )
-                    }
-                }
-            )
-
-        usuario = self.repo.buscar_usuario_por_id(
-            id_usuario
+        return self.repo.create(
+            data,
+            usuario_autenticado
         )
-
-        # Usuario no encontrado
-        if not usuario:
-
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "success": False,
-                    "statusCode": 404,
-                    "message": "Usuario no encontrado",
-                    "error": {
-                        "error_code": "USUARIO_NOT_FOUND",
-                        "details": (
-                            f"No existe un usuario "
-                            f"con el ID {id_usuario}"
-                        ),
-                        "timestamp": (
-                            datetime.utcnow().isoformat()
-                        )
-                    }
-                }
-            )
-
-        rol_anterior = usuario.id_rol
-
-        usuario_actualizado = self.repo.actualizar_rol(
-            usuario,
-            data.id_rol
-        )
-
-        # Auditoría
-        self.repo.registrar_auditoria(
-            id_usuario_modificado=id_usuario,
-            rol_anterior=rol_anterior,
-            rol_nuevo=data.id_rol,
-            id_usuario_modificador=(
-                usuario_autenticado.get("id_usuario")
-            ),
-            ip_origen=ip_origen
-        )
-
-        return usuario_actualizado

@@ -13,68 +13,63 @@ import jwt
 import os
 
 from app.domain.models_domain import (
-    CambiarRolRequest
+    ComunicadoCreate
 )
 
-from app.repository.rol_repository import (
-    RolRepository
+from app.repository.comunicados_repository import (
+    ComunicadosRepository
 )
 
-from app.service.rol_service import (
-    RolService
+from app.service.comunicados_service import (
+    ComunicadosService
 )
+
 
 SECRET_KEY = os.getenv(
     "SECRET_KEY",
     "mi_clave_secreta"
 )
 
-ALGORITHM = "HS256"
 
-
-def validar_token(token: str):
+def validar_token(token: str) -> dict:
 
     try:
 
         payload = jwt.decode(
             token,
             SECRET_KEY,
-            algorithms=[ALGORITHM]
+            algorithms=["HS256"]
         )
 
         return {
-            "id_usuario": payload.get(
-                "id_usuario"
+            "id_usuario": payload.get("id_usuario"),
+            "nombre_completo": (
+                payload.get("nombre_completo")
             ),
-            "nombre_completo": payload.get(
-                "nombre_completo"
-            ),
-            "email": payload.get(
-                "email"
-            ),
-            "id_rol": payload.get(
-                "id_rol"
-            )
+            "email": payload.get("email"),
+            "id_rol": payload.get("id_rol")
         }
 
     except:
-
         return None
 
 
-repo = RolRepository()
-service = RolService(repo)
+repo = ComunicadosRepository()
+
+service = ComunicadosService(repo)
 
 router = APIRouter(
-    prefix="/api/v1/usuarios",
-    tags=["roles"]
+    prefix="/api/v1/comunicados",
+    tags=["comunicados"]
 )
 
 
-@router.patch("/{id_usuario}/rol")
-def cambiar_rol(
-    id_usuario: int,
-    data: CambiarRolRequest,
+@router.post(
+    "/",
+    status_code=status.HTTP_201_CREATED
+)
+def create_comunicado(
+    data: ComunicadoCreate,
     request: Request
 ):
 
@@ -82,7 +77,7 @@ def cambiar_rol(
         "Authorization"
     )
 
-    # No autenticado
+    # Validar token
     if not auth_header:
 
         raise HTTPException(
@@ -132,41 +127,41 @@ def cambiar_rol(
             }
         )
 
-    usuario_actualizado = service.cambiar_rol(
-        id_usuario=id_usuario,
-        data=data,
-        usuario_autenticado=usuario,
-        ip_origen=request.client.host
+    comunicado = service.create_comunicado(
+        data,
+        usuario
     )
 
     return JSONResponse(
-        status_code=status.HTTP_200_OK,
+        status_code=status.HTTP_201_CREATED,
         content={
             "success": True,
-            "statusCode": 200,
+            "statusCode": 201,
             "message": (
-                "Rol actualizado exitosamente"
+                "Comunicado publicado exitosamente"
             ),
             "data": {
-                "id_usuario": (
-                    usuario_actualizado.id_usuario
+                "id_comunicado": (
+                    comunicado.id_comunicado
                 ),
-                "nombre_completo": (
-                    usuario_actualizado.nombre_completo
+                "titulo": comunicado.titulo,
+                "contenido": comunicado.contenido,
+                "id_autor": comunicado.id_autor,
+                "autor_nombre": (
+                    comunicado.autor_nombre
                 ),
-                "email": (
-                    usuario_actualizado.email
+                "archivos_adjuntos": (
+                    comunicado.archivos_adjuntos
                 ),
-                "id_rol": (
-                    usuario_actualizado.id_rol
+                "fecha_publicacion": (
+                    comunicado.fecha_publicacion.isoformat()
                 ),
-                "rol_nombre": (
-                    usuario_actualizado.rol_nombre
+                "fecha_expiracion": (
+                    comunicado.fecha_expiracion.isoformat()
+                    if comunicado.fecha_expiracion
+                    else None
                 ),
-                "actualizado_por": (
-                    f"{usuario['nombre_completo']} "
-                    f"(ID: {usuario['id_usuario']})"
-                )
+                "activo": comunicado.activo
             }
         }
     )

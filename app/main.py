@@ -4,7 +4,7 @@ from app.api.v1.router import router
 
 app = FastAPI(
     title="SIGECORE API",
-    description="API REST para la asignación de roles en el sistema SIGECORE",
+    description="API REST para publicación de comunicados en el sistema SIGECORE",
     version="1.0.0"
 )
 
