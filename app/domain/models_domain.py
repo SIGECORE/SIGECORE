@@ -1,16 +1,34 @@
+# app/domain/models_domain.py
 from pydantic import BaseModel
-from datetime import time, datetime
-from typing import Optional
+from typing import Optional, List
+from datetime import datetime
 
-# ... tus modelos existentes aquí ...
 
-# Añadir este modelo al final:
-class ZonaComunDomain(BaseModel):
-    id_zona: Optional[int] = None
-    nombre: str
-    capacidad_maxima: int
-    descripcion: Optional[str] = None
-    estado: str = "disponible"
-    horario_inicio: Optional[time] = None
-    horario_fin: Optional[time] = None
-    fecha_registro: Optional[datetime] = None
+class InmuebleCartera(BaseModel):
+    id_inmueble: int
+    numero: str
+    torre: str
+    area_m2: float
+
+
+class PropietarioCartera(BaseModel):
+    id_propietario: int
+    nombre_completo: str
+    email: str
+    telefono: str
+
+
+class ItemCartera(BaseModel):
+    inmueble: InmuebleCartera
+    propietario: PropietarioCartera
+    meses_mora: int
+    valor_cuota: float
+    total_adeudado: float
+    ultimo_pago: Optional[str] = None
+
+
+class ReporteCarteraResponse(BaseModel):
+    fecha_generacion: datetime
+    total_morosos: int
+    total_adeudado: float
+    cartera: List[ItemCartera]
