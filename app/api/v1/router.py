@@ -1,8 +1,10 @@
 # app/api/v1/router.py
-from fastapi import APIRouter, status, Request, HTTPException
+from fastapi import APIRouter, status, Request, HTTPException, Depends
+from sqlalchemy.orm import Session
 import jwt
 
-from domain.models_domain import PagoRequest, PagoResponse
+from database import get_db
+from schemas import PagoRequest, PagoResponse
 from service.pago_service import PagoService
 from repository.pago_repository import PagoRepository
 from repository.inmueble_repository import InmuebleRepository
@@ -23,15 +25,11 @@ def validar_token(token: str) -> dict:
         return None
 
 
-pago_repo = PagoRepository()
-inmueble_repo = InmuebleRepository()
-service = PagoService(pago_repo, inmueble_repo)
-
 router = APIRouter(prefix="/pagos", tags=["pagos"])
 
 
 @router.post("/", response_model=PagoResponse, status_code=status.HTTP_201_CREATED)
-def registrar_pago(data: PagoRequest, request: Request):
+def registrar_pago(data: PagoRequest, request: Request, db: Session = Depends(get_db)):
     
     auth_header = request.headers.get("Authorization")
     if not auth_header:
@@ -49,4 +47,7 @@ def registrar_pago(data: PagoRequest, request: Request):
             detail="Token inválido o expirado"
         )
     
+    pago_repo = PagoRepository(db)
+    inmueble_repo = InmuebleRepository(db)
+    service = PagoService(pago_repo, inmueble_repo)
     return service.registrar_pago(data, usuario)

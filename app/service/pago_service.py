@@ -1,12 +1,11 @@
 # app/service/pago_service.py
 import random
 from fastapi import HTTPException, status
-from domain.models_domain import PagoRequest, PagoResponse
+from schemas import PagoRequest, PagoResponse
 from repository.pago_repository import PagoRepository
 from repository.inmueble_repository import InmuebleRepository
 
 
-# Simulación de pasarela de pagos externa
 def procesar_pago_externo(monto: float, metodo_pago: str, token: str) -> bool:
     # Simula éxito (80%) o fracaso (20%)
     return random.random() < 0.8
@@ -23,28 +22,11 @@ class PagoService:
         id_usuario = usuario_autenticado.get('id_usuario')
         id_rol = usuario_autenticado.get('id_rol')
         
-        # Validar autenticación
-        if not id_usuario:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token de autenticación requerido"
-            )
-        
         # Validar campos obligatorios
-        if not data.id_inmueble:
+        if not data.id_inmueble or not data.monto or not data.metodo_pago:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="El campo id_inmueble es obligatorio"
-            )
-        if not data.monto:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="El campo monto es obligatorio"
-            )
-        if not data.metodo_pago:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="El campo metodo_pago es obligatorio"
+                detail="Los campos id_inmueble, monto y metodo_pago son obligatorios"
             )
         
         # Validar monto
@@ -81,10 +63,10 @@ class PagoService:
                 detail="La pasarela de pagos no está disponible en este momento"
             )
         
-        # Generar comprobante (simulado)
+        # Generar comprobante
         comprobante_url = f"/uploads/comprobantes/recibo_{random.randint(1000, 9999)}.pdf"
         
-        # Guardar pago en repositorio
+        # Guardar pago
         pago = self.pago_repo.guardar_pago(
             id_usuario=id_usuario,
             id_inmueble=data.id_inmueble,
