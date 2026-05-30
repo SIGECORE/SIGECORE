@@ -1,5 +1,5 @@
-# repository/inmueble_repository.py
-from typing import Optional, List
+# app/repository/inmueble_repository.py
+from typing import Optional, List, Dict
 from domain.models_domain import Inmueble, InmuebleCreate, EstadoInmueble
 from datetime import datetime
 
@@ -7,10 +7,13 @@ from datetime import datetime
 class InmuebleRepository:
 
     def __init__(self):
-        self._db: dict[int, Inmueble] = {}
+        self._db: Dict[int, Inmueble] = {}
         self._next_id: int = 1
 
-    def existe_por_numero_y_torre(self, numero: str, torre: str) -> bool:
+    def get_by_id(self, inmueble_id: int) -> Optional[Inmueble]:
+        return self._db.get(inmueble_id)
+
+    def exists_by_numero_torre(self, numero: str, torre: str) -> bool:
         for inmueble in self._db.values():
             if inmueble.numero == numero and inmueble.torre == torre:
                 return True

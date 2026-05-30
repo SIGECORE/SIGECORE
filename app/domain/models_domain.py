@@ -1,4 +1,4 @@
-# domain/models_domain.py
+# app/domain/models_domain.py
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
