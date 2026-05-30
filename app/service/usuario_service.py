@@ -1,211 +1,84 @@
-# service/usuario_service.py
-from fastapi import HTTPException, status
-from datetime import datetime, timedelta
+from datetime import datetime
+
 import bcrypt
-import jwt
-import os
 
-from app.repository.usuario_repository import UsuarioRepository
-from app.domain.models_domain import UsuarioLogin
+from fastapi import HTTPException
 
-
-SECRET_KEY = os.getenv(
-    "SECRET_KEY",
-    "mi_clave_secreta"
-)
-
-ALGORITHM = "HS256"
+from app.models import UsuarioModel
 
 
 class UsuarioService:
 
-    def __init__(
+    def __init__(self, repository):
+        self.repository = repository
+
+    def create_usuario(
         self,
-        repo: UsuarioRepository
+        data,
+        usuario_logueado,
+        db
     ):
 
-        self.repo = repo
-
-    def login(
-        self,
-        data: UsuarioLogin
-    ):
-
-        # ===== DEPENDENCIA DE HU-001 =====
-        # Solo usuarios registrados pueden iniciar sesión
-
-        email = data.email.lower()
-
-        usuario = self.repo.buscar_por_email(email)
-
-        # Usuario no existe
-        if not usuario:
+        if usuario_logueado["id_rol"] != 1:
 
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=403,
                 detail={
                     "success": False,
-                    "statusCode": 401,
-                    "message": "Credenciales inválidas",
+                    "statusCode": 403,
+                    "message": "Acceso denegado",
                     "error": {
-                        "error_code": "CREDENCIALES_INVALIDAS",
-                        "details": (
-                            "El correo o la contraseña son incorrectos"
-                        ),
-                        "timestamp": (
-                            datetime.utcnow().isoformat()
-                        )
+                        "error_code": "ACCESO_DENEGADO",
+                        "details": "Se requiere rol de administrador",
+                        "timestamp": datetime.utcnow().isoformat()
                     }
                 }
             )
 
-        # Usuario inactivo
-        if not usuario.activo:
+        email = data.email.lower().strip()
 
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail={
-                    "success": False,
-                    "statusCode": 401,
-                    "message": "Cuenta inactiva",
-                    "error": {
-                        "error_code": "USUARIO_INACTIVO",
-                        "details": (
-                            "La cuenta del usuario está desactivada"
-                        ),
-                        "timestamp": (
-                            datetime.utcnow().isoformat()
-                        )
-                    }
-                }
-            )
-
-        # Cuenta bloqueada
-        if (
-            usuario.bloqueado_hasta
-            and usuario.bloqueado_hasta > datetime.utcnow()
+        if self.repository.existe_por_email(
+            db,
+            email
         ):
 
             raise HTTPException(
-                status_code=status.HTTP_423_LOCKED,
+                status_code=400,
                 detail={
                     "success": False,
-                    "statusCode": 423,
-                    "message": "Cuenta bloqueada",
+                    "statusCode": 400,
+                    "message": "Error en la solicitud",
                     "error": {
-                        "error_code": "CUENTA_BLOQUEADA",
-                        "details": (
-                            "Demasiados intentos fallidos"
-                        ),
-                        "timestamp": (
-                            datetime.utcnow().isoformat()
-                        )
+                        "error_code": "EMAIL_DUPLICADO",
+                        "details": f"El email {email} ya está registrado",
+                        "timestamp": datetime.utcnow().isoformat()
                     }
                 }
             )
 
-        # Validar password
-        password_correcto = bcrypt.checkpw(
+        password_hash = bcrypt.hashpw(
             data.password.encode("utf-8"),
-            usuario.password_hash.encode("utf-8")
+            bcrypt.gensalt(rounds=10)
+        ).decode("utf-8")
+
+        usuario = UsuarioModel(
+            nombre_completo=data.nombre_completo,
+            email=email,
+            telefono=data.telefono,
+            password_hash=password_hash,
+            id_rol=data.id_rol.value,
+            activo=True
         )
 
-        # Password incorrecto
-        if not password_correcto:
-
-            nuevos_intentos = (
-                usuario.intentos_fallidos + 1
-            )
-
-            self.repo.actualizar_intentos(
-                usuario,
-                nuevos_intentos
-            )
-
-            # Bloqueo después de 3 intentos
-            if nuevos_intentos >= 3:
-
-                bloqueo = (
-                    datetime.utcnow()
-                    + timedelta(minutes=30)
-                )
-
-                self.repo.bloquear_usuario(
-                    usuario,
-                    bloqueo
-                )
-
-                raise HTTPException(
-                    status_code=status.HTTP_423_LOCKED,
-                    detail={
-                        "success": False,
-                        "statusCode": 423,
-                        "message": "Cuenta bloqueada",
-                        "error": {
-                            "error_code": (
-                                "CUENTA_BLOQUEADA"
-                            ),
-                            "details": (
-                                "Cuenta bloqueada por 30 minutos"
-                            ),
-                            "timestamp": (
-                                datetime.utcnow().isoformat()
-                            )
-                        }
-                    }
-                )
-
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail={
-                    "success": False,
-                    "statusCode": 401,
-                    "message": "Credenciales inválidas",
-                    "error": {
-                        "error_code": (
-                            "CREDENCIALES_INVALIDAS"
-                        ),
-                        "details": (
-                            "El correo o la contraseña son incorrectos"
-                        ),
-                        "timestamp": (
-                            datetime.utcnow().isoformat()
-                        )
-                    }
-                }
-            )
-
-        # Resetear intentos
-        self.repo.resetear_intentos(usuario)
-
-        # Actualizar login
-        self.repo.actualizar_ultimo_login(usuario)
-
-        fecha_actual = datetime.utcnow()
-
-        # ===== JWT =====
-        payload = {
-            "id_usuario": usuario.id_usuario,
-            "nombre_completo": usuario.nombre_completo,
-            "email": usuario.email,
-            "id_rol": usuario.id_rol,
-            "iat": fecha_actual,
-            "exp": fecha_actual + timedelta(hours=8)
-        }
-
-        token = jwt.encode(
-            payload,
-            SECRET_KEY,
-            algorithm=ALGORITHM
+        usuario = self.repository.create(
+            db,
+            usuario
         )
 
-        return {
-            "token": token,
-            "usuario": {
-                "id_usuario": usuario.id_usuario,
-                "nombre_completo": usuario.nombre_completo,
-                "email": usuario.email,
-                "id_rol": usuario.id_rol,
-                "rol_nombre": usuario.rol_nombre
-            }
-        }
+        usuario.rol_nombre = (
+            "administrador"
+            if usuario.id_rol == 1
+            else "residente"
+        )
+
+        return usuario
