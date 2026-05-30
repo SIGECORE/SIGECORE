@@ -124,6 +124,7 @@ class AuditoriaRolesModel(Base):
         nullable=True
     )
 
+    
 class ComunicadoModel(Base):
 
     __tablename__ = "comunicados"
@@ -167,4 +168,55 @@ class ComunicadoModel(Base):
     activo = Column(
         Boolean,
         default=True
+    )
+
+
+class ReporteModel(Base):
+
+    __tablename__ = "reportes"
+
+    id_reporte = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    id_usuario = Column(
+        Integer,
+        nullable=False
+    )
+
+    tipo = Column(
+        String(20),
+        nullable=False
+    )
+
+    descripcion = Column(
+        String,
+        nullable=False
+    )
+
+    evidencias = Column(
+        String,
+        nullable=True
+    )
+
+    estado = Column(
+        String(20),
+        default="pendiente"
+    )
+
+    responsable_id = Column(
+        Integer,
+        nullable=True
+    )
+
+    fecha_reporte = Column(
+        DateTime,
+        server_default=func.now()
+    )
+
+    fecha_resolucion = Column(
+        DateTime,
+        nullable=True
     )

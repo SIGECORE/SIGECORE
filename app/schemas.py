@@ -59,3 +59,14 @@ class ComunicadoConsultaResponse(BaseModel):
     autor: dict
     archivos_adjuntos: list[str]
     fecha_publicacion: datetime
+
+class ReporteResponse(BaseModel):
+
+    id_reporte: int
+    id_usuario: int
+    nombre_usuario: str
+    tipo: str
+    descripcion: str
+    evidencias: list[str]
+    estado: str
+    fecha_reporte: datetime

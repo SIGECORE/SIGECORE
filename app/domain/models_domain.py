@@ -3,36 +3,47 @@ from pydantic import (
     field_validator
 )
 
-from datetime import datetime
+from typing import List
 
 
-class ComunicadoCreate(BaseModel):
+class ReporteCreate(BaseModel):
 
-    titulo: str
-    contenido: str
-    archivos_adjuntos: list[str] = []
-    fecha_expiracion: datetime | None = None
+    tipo: str
+    descripcion: str
+    evidencias: List[str] = []
 
-    @field_validator("titulo")
+    @field_validator("tipo")
     @classmethod
-    def validar_titulo(cls, value):
+    def validar_tipo(
+        cls,
+        value
+    ):
 
-        if not value.strip():
+        tipos_validos = [
+            "daño",
+            "queja",
+            "solicitud"
+        ]
+
+        if value not in tipos_validos:
 
             raise ValueError(
-                "El campo titulo es obligatorio"
+                "El tipo debe ser: daño, queja o solicitud"
             )
 
         return value
 
-    @field_validator("contenido")
+    @field_validator("descripcion")
     @classmethod
-    def validar_contenido(cls, value):
+    def validar_descripcion(
+        cls,
+        value
+    ):
 
         if not value.strip():
 
             raise ValueError(
-                "El campo contenido es obligatorio"
+                "El campo descripcion es obligatorio"
             )
 
         return value

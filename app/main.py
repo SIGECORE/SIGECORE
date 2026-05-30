@@ -7,18 +7,20 @@ from app.database import (
     engine
 )
 
-from app.models import UsuarioModel
+from app.models import (
+    UsuarioModel,
+    ReporteModel
+)
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="SIGECORE API",
-    description="API REST para la consulta de comunicados en el sistema SIGECORE",
+    description="API REST para la creacion de reportes en el sistema SIGECORE",
     version="1.0.0"
 )
 
 app.include_router(router)
-
 
 @app.get("/")
 def root():
