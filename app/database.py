@@ -18,9 +18,14 @@ def init_db():
     with get_db() as conn:
         cursor = conn.cursor()
         
+        # Eliminar tablas si existen para recrearlas limpias
+        cursor.execute("DROP TABLE IF EXISTS reservas")
+        cursor.execute("DROP TABLE IF EXISTS zonas_comunes")
+        cursor.execute("DROP TABLE IF EXISTS usuarios")
+        
         # Tabla de usuarios
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS usuarios (
+            CREATE TABLE usuarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nombre TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
@@ -32,7 +37,7 @@ def init_db():
         
         # Tabla de zonas comunes
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS zonas_comunes (
+            CREATE TABLE zonas_comunes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nombre TEXT UNIQUE NOT NULL,
                 capacidad_maxima INTEGER NOT NULL,
@@ -44,11 +49,36 @@ def init_db():
             )
         """)
         
+        # Tabla de reservas
+        cursor.execute("""
+            CREATE TABLE reservas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                zona_id INTEGER NOT NULL,
+                usuario_id INTEGER NOT NULL,
+                fecha DATE NOT NULL,
+                hora_inicio TIME NOT NULL,
+                hora_fin TIME NOT NULL,
+                estado TEXT DEFAULT 'pendiente',
+                observaciones TEXT,
+                fecha_solicitud TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (zona_id) REFERENCES zonas_comunes(id),
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+            )
+        """)
+        
         # Insertar usuario administrador por defecto
         cursor.execute("""
-            INSERT OR IGNORE INTO usuarios (id, nombre, email, password, rol)
+            INSERT INTO usuarios (id, nombre, email, password, rol)
             VALUES (1, 'Administrador', 'admin@admin.com', 'admin123', 'administrador')
+        """)
+        
+        # Insertar usuario residente de prueba
+        cursor.execute("""
+            INSERT INTO usuarios (id, nombre, email, password, rol)
+            VALUES (2, 'Carlos Rodríguez', 'carlos@test.com', '123456', 'residente')
         """)
         
         conn.commit()
         print("Base de datos inicializada correctamente")
+        print("- Usuario admin: admin@admin.com / admin123")
+        print("- Usuario residente: carlos@test.com / 123456")
