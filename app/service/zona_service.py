@@ -6,48 +6,32 @@ class ZonaService:
     def __init__(self):
         self.repository = ZonaRepository()
     
-    def listar_zonas(self):
-        """Listar todas las zonas"""
-        zonas = self.repository.get_all()
-        return [dict(zona) for zona in zonas]
-    
-    def obtener_zona(self, zona_id):
-        """Obtener una zona por ID"""
-        zona = self.repository.get_by_id(zona_id)
-        if not zona:
-            return None
-        return dict(zona)
-    
-    def crear_zona(self, nombre, descripcion, capacidad):
-        """Crear una nueva zona"""
-        # Validaciones del domain
-        nombre = ZonaDomain.validar_nombre(nombre)
-        capacidad = ZonaDomain.validar_capacidad(capacidad)
+    def registrar_zona(self, nombre, capacidad_maxima, descripcion, horario_inicio, horario_fin, usuario_actual):
+        """Registrar una nueva zona común"""
         
-        zona_id = self.repository.create(nombre, descripcion, capacidad)
-        return self.obtener_zona(zona_id)
-    
-    def actualizar_zona(self, zona_id, nombre=None, descripcion=None, capacidad=None, estado=None):
-        """Actualizar una zona"""
-        # Validar que existe
-        zona = self.repository.get_by_id(zona_id)
-        ZonaDomain.existe_zona(zona, zona_id)
+        # Validar que sea administrador
+        ZonaDomain.validar_administrador(usuario_actual)
         
-        # Validaciones del domain
-        if nombre:
-            nombre = ZonaDomain.validar_nombre(nombre)
-        if capacidad:
-            capacidad = ZonaDomain.validar_capacidad(capacidad)
-        if estado:
-            estado = ZonaDomain.validar_estado(estado)
+        # Validar campos requeridos
+        ZonaDomain.validar_campos_requeridos(nombre, capacidad_maxima)
         
-        self.repository.update(zona_id, nombre, descripcion, capacidad, estado)
-        return self.obtener_zona(zona_id)
-    
-    def eliminar_zona(self, zona_id):
-        """Eliminar una zona"""
-        # Validar que existe
-        zona = self.repository.get_by_id(zona_id)
-        ZonaDomain.existe_zona(zona, zona_id)
+        # Validar capacidad
+        capacidad_maxima = ZonaDomain.validar_capacidad(capacidad_maxima)
         
-        return self.repository.delete(zona_id)
+        # Validar nombre único
+        zona_existente = self.repository.get_by_nombre(nombre)
+        ZonaDomain.validar_nombre_unico(zona_existente, nombre)
+        
+        # Crear zona
+        zona = self.repository.create(nombre, capacidad_maxima, descripcion, horario_inicio, horario_fin)
+        
+        return {
+            "id_zona": zona["id"],
+            "nombre": zona["nombre"],
+            "capacidad_maxima": zona["capacidad_maxima"],
+            "descripcion": zona["descripcion"],
+            "estado": zona["estado"],
+            "horario_inicio": zona["horario_inicio"],
+            "horario_fin": zona["horario_fin"],
+            "fecha_registro": zona["fecha_registro"]
+        }

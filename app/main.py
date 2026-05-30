@@ -9,7 +9,7 @@ init_db()
 # Crear aplicación
 app = FastAPI(
     title="API de Zonas Comunes",
-    description="API para gestión de zonas comunes",
+    description="API para gestión de zonas comunes del conjunto",
     version="1.0.0"
 )
 
@@ -27,8 +27,17 @@ app.include_router(zonas_router)
 
 @app.get("/")
 def root():
-    return {"message": "API de Zonas Comunes", "version": "1.0.0"}
+    return {
+        "message": "API de Zonas Comunes",
+        "version": "1.0.0",
+        "endpoints": {
+            "registrar_zona": "POST /api/v1/zonas",
+            "docs": "GET /docs"
+        }
+    }
 
 @app.get("/health")
 def health():
-    return {"status": "healthy"}
+    return {"status": "healthy", "timestamp": datetime.now().isoformat() + "Z"}
+
+from datetime import datetime

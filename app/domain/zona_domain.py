@@ -1,38 +1,42 @@
 # ==================== HU-007: Domain de Zonas Comunes ====================
 
 class ErrorCode:
-    ZONA_NOT_FOUND = "ZONA_NOT_FOUND"
-    ZONA_NOMBRE_REQUERIDO = "ZONA_NOMBRE_REQUERIDO"
-    ZONA_ESTADO_INVALIDO = "ZONA_ESTADO_INVALIDO"
-    ZONA_CAPACIDAD_INVALIDA = "ZONA_CAPACIDAD_INVALIDA"
+    NO_AUTENTICADO = "NO_AUTENTICADO"
+    ACCESO_DENEGADO = "ACCESO_DENEGADO"
+    ZONA_DUPLICADA = "ZONA_DUPLICADA"
+    CAPACIDAD_INVALIDA = "CAPACIDAD_INVALIDA"
+    CAMPO_REQUERIDO = "CAMPO_REQUERIDO"
 
 class ZonaDomain:
     
     @staticmethod
-    def validar_nombre(nombre):
-        """Validar que el nombre no esté vacío"""
+    def validar_administrador(usuario):
+        """Validar que el usuario sea administrador"""
+        if not usuario:
+            raise Exception(ErrorCode.NO_AUTENTICADO)
+        if usuario.get("rol") != "administrador":
+            raise Exception(ErrorCode.ACCESO_DENEGADO)
+        return True
+    
+    @staticmethod
+    def validar_campos_requeridos(nombre, capacidad_maxima):
+        """Validar que los campos obligatorios estén presentes"""
         if not nombre or not nombre.strip():
-            raise Exception(ErrorCode.ZONA_NOMBRE_REQUERIDO)
-        return nombre.strip()
+            raise Exception(ErrorCode.CAMPO_REQUERIDO)
+        if capacidad_maxima is None:
+            raise Exception(ErrorCode.CAMPO_REQUERIDO)
+        return True
     
     @staticmethod
-    def validar_capacidad(capacidad):
-        """Validar que la capacidad sea positiva"""
-        if capacidad is not None and capacidad <= 0:
-            raise Exception(ErrorCode.ZONA_CAPACIDAD_INVALIDA)
-        return capacidad
+    def validar_capacidad(capacidad_maxima):
+        """Validar que la capacidad sea un entero positivo"""
+        if not isinstance(capacidad_maxima, int) or capacidad_maxima <= 0:
+            raise Exception(ErrorCode.CAPACIDAD_INVALIDA)
+        return capacidad_maxima
     
     @staticmethod
-    def validar_estado(estado):
-        """Validar que el estado sea válido"""
-        estados_validos = ["disponible", "mantenimiento"]
-        if estado and estado not in estados_validos:
-            raise Exception(ErrorCode.ZONA_ESTADO_INVALIDO)
-        return estado
-    
-    @staticmethod
-    def existe_zona(zona, zona_id):
-        """Validar que la zona existe"""
-        if not zona:
-            raise Exception(ErrorCode.ZONA_NOT_FOUND)
+    def validar_nombre_unico(zona_existente, nombre):
+        """Validar que el nombre de la zona no esté duplicado"""
+        if zona_existente:
+            raise Exception(ErrorCode.ZONA_DUPLICADA)
         return True
