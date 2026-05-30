@@ -1,17 +1,50 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from database import get_db
-from datetime import datetime
+# app/api/v1/router.py
+from fastapi import APIRouter, status, Request, HTTPException
+import jwt
 
-router = APIRouter()
+from domain.models_domain import InmuebleCreate, Inmueble
+from service.inmueble_service import InmuebleService
+from repository.inmueble_repository import InmuebleRepository
 
-@router.post("/api/v1/zonas", status_code=201, tags=["Zonas Comunes"])
-async def registrar_zona(
-    request: dict,
-    db: Session = Depends(get_db)
-):
-    return {
-        "success": True,
-        "statusCode": 201,
-        "message": "Zona común registrada exitosamente"
-    }
+
+SECRET_KEY = "mi_clave_secreta"
+
+def validar_token(token: str) -> dict:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        return {
+            "id_usuario": payload.get("id_usuario"),
+            "nombre_completo": payload.get("nombre_completo"),
+            "email": payload.get("email"),
+            "id_rol": payload.get("id_rol")
+        }
+    except:
+        return None
+
+
+repo = InmuebleRepository()
+service = InmuebleService(repo)
+
+router = APIRouter(prefix="/inmuebles", tags=["inmuebles"])
+
+
+@router.post("/", response_model=Inmueble, status_code=status.HTTP_201_CREATED)
+def create_inmueble(data: InmuebleCreate, request: Request):
+    
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token de autenticación requerido"
+        )
+    
+    token = auth_header.split(" ")[1] if " " in auth_header else auth_header
+    usuario = validar_token(token)
+    
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido o expirado"
+        )
+    
+    return service.create_inmueble(data, usuario)

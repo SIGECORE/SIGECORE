@@ -1,7 +1,6 @@
-# service/inmueble_service.py
+# app/service/inmueble_service.py
 from fastapi import HTTPException, status
-
-from domain.models_domain import Inmueble, InmuebleCreate
+from domain.models_domain import InmuebleCreate, Inmueble
 from repository.inmueble_repository import InmuebleRepository
 
 
@@ -11,7 +10,7 @@ class InmuebleService:
         self.repo = repo
 
     def create_inmueble(self, data: InmuebleCreate, usuario_autenticado: dict) -> Inmueble:
-
+        
         if usuario_autenticado.get('id_rol') != 1:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -24,7 +23,7 @@ class InmuebleService:
                 detail="El área debe ser un número mayor a 0"
             )
 
-        if self.repo.existe_por_numero_y_torre(data.numero, data.torre):
+        if self.repo.exists_by_numero_torre(data.numero, data.torre):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Ya existe un inmueble con el número {data.numero} en la torre {data.torre}"

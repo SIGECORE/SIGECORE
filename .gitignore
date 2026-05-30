@@ -1,0 +1,13 @@
+__pycache__/ 
+*.pyc 
+venv/ 
+.env 
+*.db 
+venv/ 
+Documentacion/ 
+__pycache__/ 
+*.pyc 
+*.db 
+.env.example 
+Comandos Github 
+app_backup/ 
