@@ -1,6 +1,15 @@
-# main.py
 from fastapi import FastAPI
+
 from app.api.v1.router import router
+
+from app.database import (
+    Base,
+    engine
+)
+
+from app.models import UsuarioModel
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="SIGECORE API",
@@ -10,6 +19,9 @@ app = FastAPI(
 
 app.include_router(router)
 
+
 @app.get("/")
 def root():
-    return {"message": "¡API de SIGECORE funcionando! 🚀"}
+    return {
+        "message": "¡API de SIGECORE funcionando! 🚀"
+    }

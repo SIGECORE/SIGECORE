@@ -1,95 +1,84 @@
-# service/usuario_service.py
-from fastapi import HTTPException, status
 from datetime import datetime
 
-from app.domain.models_domain import Usuario, UsuarioCreate
-from app.repository.usuario_repository import UsuarioRepository
+import bcrypt
 
+from fastapi import HTTPException
 
-# Constantes de errores
-EMAIL_DUPLICADO = "EMAIL_DUPLICADO"
-INVALID_DATA = "INVALID_DATA"
-ROL_INVALIDO = "ROL_INVALIDO"
-ACCESO_DENEGADO = "ACCESO_DENEGADO"
+from app.models import UsuarioModel
 
 
 class UsuarioService:
 
-    def __init__(self, repo: UsuarioRepository):
-        self.repo = repo
+    def __init__(self, repository):
+        self.repository = repository
 
     def create_usuario(
         self,
-        data: UsuarioCreate,
-        usuario_autenticado: dict
-    ) -> Usuario:
+        data,
+        usuario_logueado,
+        db
+    ):
 
-        # Validar rol administrador
-        if usuario_autenticado.get("id_rol") != 1:
+        if usuario_logueado["id_rol"] != 1:
+
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
+                status_code=403,
                 detail={
                     "success": False,
                     "statusCode": 403,
                     "message": "Acceso denegado",
                     "error": {
-                        "error_code": ACCESO_DENEGADO,
+                        "error_code": "ACCESO_DENEGADO",
                         "details": "Se requiere rol de administrador",
                         "timestamp": datetime.utcnow().isoformat()
                     }
                 }
             )
 
-        # Normalizar email
-        email_normalizado = data.email.lower()
+        email = data.email.lower().strip()
 
-        # Validar email duplicado
-        if self.repo.existe_por_email(email_normalizado):
+        if self.repository.existe_por_email(
+            db,
+            email
+        ):
+
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=400,
                 detail={
                     "success": False,
                     "statusCode": 400,
                     "message": "Error en la solicitud",
                     "error": {
-                        "error_code": EMAIL_DUPLICADO,
-                        "details": f"El email {email_normalizado} ya está registrado",
+                        "error_code": "EMAIL_DUPLICADO",
+                        "details": f"El email {email} ya está registrado",
                         "timestamp": datetime.utcnow().isoformat()
                     }
                 }
             )
 
-        # Validar longitud de contraseña
-        if len(data.password) < 6:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "success": False,
-                    "statusCode": 400,
-                    "message": "Error en la solicitud",
-                    "error": {
-                        "error_code": INVALID_DATA,
-                        "details": "La contraseña debe tener mínimo 6 caracteres",
-                        "timestamp": datetime.utcnow().isoformat()
-                    }
-                }
-            )
+        password_hash = bcrypt.hashpw(
+            data.password.encode("utf-8"),
+            bcrypt.gensalt(rounds=10)
+        ).decode("utf-8")
 
-        # Validar rol permitido
-        if data.id_rol not in [1, 2]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "success": False,
-                    "statusCode": 400,
-                    "message": "Error en la solicitud",
-                    "error": {
-                        "error_code": ROL_INVALIDO,
-                        "details": "El rol debe ser 1 (administrador) o 2 (residente)",
-                        "timestamp": datetime.utcnow().isoformat()
-                    }
-                }
-            )
+        usuario = UsuarioModel(
+            nombre_completo=data.nombre_completo,
+            email=email,
+            telefono=data.telefono,
+            password_hash=password_hash,
+            id_rol=data.id_rol.value,
+            activo=True
+        )
 
-        # Crear usuario
-        return self.repo.create(data)
+        usuario = self.repository.create(
+            db,
+            usuario
+        )
+
+        usuario.rol_nombre = (
+            "administrador"
+            if usuario.id_rol == 1
+            else "residente"
+        )
+
+        return usuario

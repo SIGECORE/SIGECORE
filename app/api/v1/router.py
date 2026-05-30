@@ -1,10 +1,24 @@
-# api/v1/router.py
-from fastapi import APIRouter, status, Request, HTTPException
-from fastapi.responses import JSONResponse
 from datetime import datetime
+
+from fastapi import (
+    APIRouter,
+    status,
+    Request,
+    HTTPException,
+    Depends
+)
+
+from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
+
 import jwt
 
-from app.domain.models_domain import Usuario, UsuarioCreate
+from app.database import get_db
+
+from app.domain.models_domain import (
+    UsuarioCreate
+)
+
 from app.service.usuario_service import UsuarioService
 from app.repository.usuario_repository import UsuarioRepository
 
@@ -12,8 +26,10 @@ from app.repository.usuario_repository import UsuarioRepository
 SECRET_KEY = "mi_clave_secreta"
 
 
-def validar_token(token: str) -> dict:
+def validar_token(token: str):
+
     try:
+
         payload = jwt.decode(
             token,
             SECRET_KEY,
@@ -46,28 +62,30 @@ router = APIRouter(
 )
 def create_usuario(
     data: UsuarioCreate,
-    request: Request
+    request: Request,
+    db: Session = Depends(get_db)
 ):
 
-    # Validar Authorization header
-    auth_header = request.headers.get("Authorization")
+    auth_header = request.headers.get(
+        "Authorization"
+    )
 
     if not auth_header:
+
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=401,
             detail={
                 "success": False,
                 "statusCode": 401,
                 "message": "Usuario no autenticado",
                 "error": {
                     "error_code": "NO_AUTENTICADO",
-                    "details": "Token de autenticación requerido",
+                    "details": "Token requerido",
                     "timestamp": datetime.utcnow().isoformat()
                 }
             }
         )
 
-    # Obtener token
     token = (
         auth_header.split(" ")[1]
         if " " in auth_header
@@ -76,10 +94,10 @@ def create_usuario(
 
     usuario = validar_token(token)
 
-    # Validar token
     if not usuario:
+
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=401,
             detail={
                 "success": False,
                 "statusCode": 401,
@@ -92,15 +110,14 @@ def create_usuario(
             }
         )
 
-    # Crear usuario
     nuevo_usuario = service.create_usuario(
         data,
-        usuario
+        usuario,
+        db
     )
 
-    # Respuesta exitosa
     return JSONResponse(
-        status_code=status.HTTP_201_CREATED,
+        status_code=201,
         content={
             "success": True,
             "statusCode": 201,
@@ -113,9 +130,7 @@ def create_usuario(
                 "id_rol": nuevo_usuario.id_rol,
                 "rol_nombre": nuevo_usuario.rol_nombre,
                 "activo": nuevo_usuario.activo,
-                "fecha_registro": (
-                    nuevo_usuario.fecha_registro.isoformat()
-                )
+                "fecha_registro": nuevo_usuario.fecha_registro.isoformat()
             }
         }
     )
