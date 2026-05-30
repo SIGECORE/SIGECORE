@@ -1,37 +1,42 @@
-# api/v1/router.py
+from datetime import datetime
+
+import jwt
+
 from fastapi import (
     APIRouter,
-    status,
     Request,
-    HTTPException
+    Depends,
+    HTTPException,
+    status
 )
 
 from fastapi.responses import JSONResponse
 
-from datetime import datetime
-import jwt
-import os
+from sqlalchemy.orm import Session
+
+from app.database import get_db
 
 from app.domain.models_domain import (
     ComunicadoCreate
 )
 
-from app.repository.comunicados_repository import (
-    ComunicadosRepository
+from app.repository.comunicado_repository import (
+    ComunicadoRepository
 )
 
-from app.service.comunicados_service import (
-    ComunicadosService
+from app.service.comunicado_service import (
+    ComunicadoService
+)
+
+SECRET_KEY = "mi_clave_secreta"
+
+router = APIRouter(
+    prefix="/api/v1/comunicados",
+    tags=["comunicados"]
 )
 
 
-SECRET_KEY = os.getenv(
-    "SECRET_KEY",
-    "mi_clave_secreta"
-)
-
-
-def validar_token(token: str) -> dict:
+def validar_token(token: str):
 
     try:
 
@@ -41,60 +46,44 @@ def validar_token(token: str) -> dict:
             algorithms=["HS256"]
         )
 
-        return {
-            "id_usuario": payload.get("id_usuario"),
-            "nombre_completo": (
-                payload.get("nombre_completo")
-            ),
-            "email": payload.get("email"),
-            "id_rol": payload.get("id_rol")
-        }
+        return payload
 
     except:
+
         return None
 
 
-repo = ComunicadosRepository()
+repo = ComunicadoRepository()
 
-service = ComunicadosService(repo)
-
-router = APIRouter(
-    prefix="/api/v1/comunicados",
-    tags=["comunicados"]
-)
+service = ComunicadoService(repo)
 
 
 @router.post(
     "/",
     status_code=status.HTTP_201_CREATED
 )
-def create_comunicado(
+def publicar_comunicado(
     data: ComunicadoCreate,
-    request: Request
+    request: Request,
+    db: Session = Depends(get_db)
 ):
 
     auth_header = request.headers.get(
         "Authorization"
     )
 
-    # Validar token
     if not auth_header:
 
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=401,
             detail={
                 "success": False,
                 "statusCode": 401,
                 "message": "No autenticado",
                 "error": {
                     "error_code": "NO_AUTENTICADO",
-                    "details": (
-                        "Se requiere un token "
-                        "de autenticación válido"
-                    ),
-                    "timestamp": (
-                        datetime.utcnow().isoformat()
-                    )
+                    "details": "Se requiere un token de autenticación válido",
+                    "timestamp": datetime.utcnow().isoformat()
                 }
             }
         )
@@ -110,52 +99,43 @@ def create_comunicado(
     if not usuario:
 
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=401,
             detail={
                 "success": False,
                 "statusCode": 401,
                 "message": "No autenticado",
                 "error": {
                     "error_code": "NO_AUTENTICADO",
-                    "details": (
-                        "Token inválido o expirado"
-                    ),
-                    "timestamp": (
-                        datetime.utcnow().isoformat()
-                    )
+                    "details": "Se requiere un token de autenticación válido",
+                    "timestamp": datetime.utcnow().isoformat()
                 }
             }
         )
 
-    comunicado = service.create_comunicado(
+    comunicado = service.publicar_comunicado(
         data,
-        usuario
+        usuario,
+        db
     )
 
     return JSONResponse(
-        status_code=status.HTTP_201_CREATED,
+        status_code=201,
         content={
             "success": True,
             "statusCode": 201,
-            "message": (
-                "Comunicado publicado exitosamente"
-            ),
+            "message": "Comunicado publicado exitosamente",
             "data": {
-                "id_comunicado": (
-                    comunicado.id_comunicado
-                ),
+                "id_comunicado": comunicado.id_comunicado,
                 "titulo": comunicado.titulo,
                 "contenido": comunicado.contenido,
                 "id_autor": comunicado.id_autor,
-                "autor_nombre": (
-                    comunicado.autor_nombre
-                ),
+                "autor_nombre": usuario["nombre_completo"],
                 "archivos_adjuntos": (
-                    comunicado.archivos_adjuntos
+                    comunicado.archivos_adjuntos.split(",")
+                    if comunicado.archivos_adjuntos
+                    else []
                 ),
-                "fecha_publicacion": (
-                    comunicado.fecha_publicacion.isoformat()
-                ),
+                "fecha_publicacion": comunicado.fecha_publicacion.isoformat(),
                 "fecha_expiracion": (
                     comunicado.fecha_expiracion.isoformat()
                     if comunicado.fecha_expiracion
