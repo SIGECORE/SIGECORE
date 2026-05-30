@@ -9,6 +9,7 @@ from fastapi import (
 )
 
 from fastapi.responses import JSONResponse
+
 from sqlalchemy.orm import Session
 
 import jwt
@@ -16,7 +17,8 @@ import jwt
 from app.database import get_db
 
 from app.domain.models_domain import (
-    UsuarioCreate
+    UsuarioCreate,
+    LoginRequest
 )
 
 from app.service.usuario_service import UsuarioService
@@ -48,6 +50,7 @@ def validar_token(token: str):
 
 
 repo = UsuarioRepository()
+
 service = UsuarioService(repo)
 
 router = APIRouter(
@@ -130,7 +133,36 @@ def create_usuario(
                 "id_rol": nuevo_usuario.id_rol,
                 "rol_nombre": nuevo_usuario.rol_nombre,
                 "activo": nuevo_usuario.activo,
-                "fecha_registro": nuevo_usuario.fecha_registro.isoformat()
+                "fecha_registro": (
+                    nuevo_usuario.fecha_registro.isoformat()
+                    if nuevo_usuario.fecha_registro
+                    else None
+                )
             }
+        }
+    )
+
+
+@router.post(
+    "/login",
+    status_code=status.HTTP_200_OK
+)
+def login_usuario(
+    data: LoginRequest,
+    db: Session = Depends(get_db)
+):
+
+    resultado = service.login(
+        data,
+        db
+    )
+
+    return JSONResponse(
+        status_code=200,
+        content={
+            "success": True,
+            "statusCode": 200,
+            "message": "Inicio de sesión exitoso",
+            "data": resultado
         }
     )

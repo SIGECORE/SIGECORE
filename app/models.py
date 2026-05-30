@@ -66,3 +66,18 @@ class UsuarioModel(Base):
         DateTime,
         nullable=True
     )
+
+    ultimo_login = Column(
+        DateTime,
+        nullable=True
+    )
+
+    ip_registro = Column(
+        String(45),
+        nullable=True
+    )
+
+    user_agent = Column(
+        String,
+        nullable=True
+    )

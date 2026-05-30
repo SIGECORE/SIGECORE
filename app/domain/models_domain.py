@@ -1,4 +1,9 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    field_validator
+)
+
 from datetime import datetime
 from enum import Enum
 
@@ -20,6 +25,7 @@ class UsuarioBase(BaseModel):
     def validar_nombre(cls, value):
 
         if not value.strip():
+
             raise ValueError(
                 "El nombre_completo es obligatorio"
             )
@@ -31,11 +37,13 @@ class UsuarioBase(BaseModel):
     def validar_telefono(cls, value):
 
         if not value.strip():
+
             raise ValueError(
                 "El campo telefono es obligatorio"
             )
 
         if len(value) < 7:
+
             raise ValueError(
                 "El teléfono no es válido"
             )
@@ -52,6 +60,7 @@ class UsuarioCreate(UsuarioBase):
     def validar_password(cls, value):
 
         if len(value) < 6:
+
             raise ValueError(
                 "La contraseña debe tener mínimo 6 caracteres"
             )
@@ -59,12 +68,35 @@ class UsuarioCreate(UsuarioBase):
         return value
 
 
-class Usuario(UsuarioBase):
+class LoginRequest(BaseModel):
+
+    email: EmailStr
+    password: str
+
+    @field_validator("password")
+    @classmethod
+    def validar_password(cls, value):
+
+        if not value.strip():
+
+            raise ValueError(
+                "La contraseña es obligatoria"
+            )
+
+        return value
+
+
+class Usuario(BaseModel):
 
     id_usuario: int
+    nombre_completo: str
+    email: str
+    telefono: str
+    id_rol: int
     rol_nombre: str
     activo: bool
     fecha_registro: datetime
 
     class Config:
         from_attributes = True
+        

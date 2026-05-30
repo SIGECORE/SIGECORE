@@ -47,3 +47,15 @@ class UsuarioRepository:
         db.refresh(usuario)
 
         return usuario
+
+    def actualizar(
+        self,
+        db: Session,
+        usuario: UsuarioModel
+    ):
+
+        db.commit()
+
+        db.refresh(usuario)
+
+        return usuario

@@ -14,6 +14,12 @@ class UsuarioResponse(BaseModel):
     fecha_registro: datetime
 
 
+class LoginResponse(BaseModel):
+
+    token: str
+    usuario: dict
+
+
 class SuccessResponse(BaseModel):
 
     success: bool
