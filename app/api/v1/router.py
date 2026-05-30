@@ -145,3 +145,110 @@ def publicar_comunicado(
             }
         }
     )
+
+@router.get(
+    "/activos",
+    status_code=status.HTTP_200_OK
+)
+def consultar_comunicados_activos(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+
+    auth_header = request.headers.get(
+        "Authorization"
+    )
+
+    if not auth_header:
+
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "success": False,
+                "statusCode": 401,
+                "message": "No autenticado",
+                "error": {
+                    "error_code": "NO_AUTENTICADO",
+                    "details": "Se requiere un token de autenticación válido",
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+            }
+        )
+
+    token = (
+        auth_header.split(" ")[1]
+        if " " in auth_header
+        else auth_header
+    )
+
+    usuario = validar_token(token)
+
+    if not usuario:
+
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "success": False,
+                "statusCode": 401,
+                "message": "No autenticado",
+                "error": {
+                    "error_code": "NO_AUTENTICADO",
+                    "details": "Se requiere un token de autenticación válido",
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+            }
+        )
+
+    comunicados = (
+        service.obtener_comunicados_activos(db)
+    )
+
+    if not comunicados:
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "success": True,
+                "statusCode": 200,
+                "message": "No hay comunicados activos en este momento",
+                "data": {
+                    "comunicados": []
+                }
+            }
+        )
+
+    resultado = []
+
+    for comunicado in comunicados:
+
+        resultado.append(
+            {
+                "id_comunicado": comunicado.id_comunicado,
+                "titulo": comunicado.titulo,
+                "contenido": comunicado.contenido,
+                "autor": {
+                    "id_autor": comunicado.id_autor,
+                    "nombre": "Administrador"
+                },
+                "archivos_adjuntos": (
+                    comunicado.archivos_adjuntos.split(",")
+                    if comunicado.archivos_adjuntos
+                    else []
+                ),
+                "fecha_publicacion": (
+                    comunicado.fecha_publicacion.isoformat()
+                )
+            }
+        )
+
+    return JSONResponse(
+        status_code=200,
+        content={
+            "success": True,
+            "statusCode": 200,
+            "message": "Consulta exitosa",
+            "data": {
+                "comunicados": resultado
+            }
+        }
+    )

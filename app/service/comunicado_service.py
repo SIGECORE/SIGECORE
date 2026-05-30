@@ -69,3 +69,15 @@ class ComunicadoService:
         )
 
         return comunicado
+    
+    def obtener_comunicados_activos(
+    self,
+    db
+):
+
+        comunicados = (
+        self.repository
+        .obtener_comunicados_activos(db)
+    )
+
+        return comunicados

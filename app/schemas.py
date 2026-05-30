@@ -50,3 +50,12 @@ class ComunicadoResponse(BaseModel):
     fecha_publicacion: datetime
     fecha_expiracion: datetime | None
     activo: bool
+
+class ComunicadoConsultaResponse(BaseModel):
+
+    id_comunicado: int
+    titulo: str
+    contenido: str
+    autor: dict
+    archivos_adjuntos: list[str]
+    fecha_publicacion: datetime

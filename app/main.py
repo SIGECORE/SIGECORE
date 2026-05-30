@@ -13,7 +13,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="SIGECORE API",
-    description="API REST para registro de usuarios en el sistema SIGECORE",
+    description="API REST para la consulta de comunicados en el sistema SIGECORE",
     version="1.0.0"
 )
 
