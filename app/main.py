@@ -1,19 +1,43 @@
 from fastapi import FastAPI
-from app.database import engine
-from app.models import Base
-from app.api.v1.router import router
+from fastapi.middleware.cors import CORSMiddleware
+from app.database import init_db
+from app.api.v1.zonas import router as zonas_router
 
-# Crear tablas
-Base.metadata.create_all(bind=engine)
+# Inicializar base de datos
+init_db()
 
-app = FastAPI(title="SIGECORE API", version="1.0.0")
+# Crear aplicación
+app = FastAPI(
+    title="API de Zonas Comunes",
+    description="API para gestión de zonas comunes del conjunto",
+    version="1.0.0"
+)
 
-app.include_router(router, prefix="/api/v1")
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Routers
+app.include_router(zonas_router)
 
 @app.get("/")
 def root():
-    return {"message": "SIGECORE API - Registro de Zonas Comunes"}
+    return {
+        "message": "API de Zonas Comunes",
+        "version": "1.0.0",
+        "endpoints": {
+            "registrar_zona": "POST /api/v1/zonas",
+            "docs": "GET /docs"
+        }
+    }
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "healthy", "timestamp": datetime.now().isoformat() + "Z"}
+
+from datetime import datetime
