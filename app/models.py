@@ -211,7 +211,17 @@ class ReporteModel(Base):
         nullable=True
     )
 
+    observaciones = Column(
+        String,
+        nullable=True
+    )
+
     fecha_reporte = Column(
+        DateTime,
+        server_default=func.now()
+    )
+
+    fecha_actualizacion = Column(
         DateTime,
         server_default=func.now()
     )

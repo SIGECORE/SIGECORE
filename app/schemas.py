@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
 
 class UsuarioResponse(BaseModel):
@@ -70,3 +71,13 @@ class ReporteResponse(BaseModel):
     evidencias: list[str]
     estado: str
     fecha_reporte: datetime
+
+    
+
+class ActualizarEstadoReporteRequest(BaseModel):
+
+    estado: str
+
+    observaciones: Optional[str] = None
+
+    id_responsable: Optional[int] = None

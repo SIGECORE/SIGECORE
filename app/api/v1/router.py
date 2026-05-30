@@ -23,10 +23,18 @@ from app.domain.models_domain import (
 from app.repository.reporte_repository import (
     ReporteRepository
 )
+from app.schemas import (
+    ActualizarEstadoReporteRequest
+)
 
+from app.repository.usuario_repository import (
+    UsuarioRepository
+)
+from app.service import reporte_service
 from app.service.reporte_service import (
     ReporteService
 )
+
 
 
 SECRET_KEY = "mi_clave_secreta"
@@ -144,3 +152,41 @@ def crear_reporte(
             }
         }
     )
+
+usuario_repository = UsuarioRepository()
+@router.patch(
+    "/{id_reporte}/estado"
+)
+def actualizar_estado_reporte(
+    id_reporte: int,
+    data: ActualizarEstadoReporteRequest,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+
+    reporte = reporte_service.actualizar_estado(
+        id_reporte,
+        data,
+        db,
+        usuario_repository
+    )
+
+    return {
+        "success": True,
+        "statusCode": 200,
+        "message": (
+            "Reporte resuelto exitosamente"
+            if reporte.estado == "resuelto"
+            else "Estado del reporte actualizado exitosamente"
+        ),
+        "data": {
+            "id_reporte": reporte.id_reporte,
+            "estado": reporte.estado,
+            "observaciones": reporte.observaciones,
+            "responsable": {
+                "id_responsable": reporte.responsable_id
+            },
+            "fecha_actualizacion": reporte.fecha_actualizacion,
+            "fecha_resolucion": reporte.fecha_resolucion
+        }
+    }
