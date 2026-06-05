@@ -48,3 +48,7 @@ def create_inmueble(data: InmuebleCreate, request: Request):
         )
     
     return service.create_inmueble(data, usuario)
+
+@router.post("/zonas")
+def crear_zona():
+    return {"message": "Zona creada"}
