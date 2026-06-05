@@ -1,8 +1,7 @@
-# app/service/inmueble_service.py
-from typing import Optional
 from fastapi import HTTPException, status
 from domain.models_domain import (
-    InmuebleResponse, InmuebleCreate, ListaInmueblesResponse, PaginacionInfo
+    InmuebleResponse, InmuebleCreate, ListaInmueblesResponse,
+    PaginacionInfo, InmuebleConPropietario
 )
 from repository.inmueble_repository import InmuebleRepository
 
@@ -26,10 +25,15 @@ class InmuebleService:
                 detail="El área debe ser un número mayor a 0"
             )
 
+        if self.repo.exists_by_numero_torre(data.numero, data.torre):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Ya existe un inmueble con el número {data.numero} en la torre {data.torre}"
+            )
+
         return self.repo.create(data)
 
-    def listar_inmuebles(self, torre: Optional[str] = None, estado: Optional[str] = None,
-                         page: int = 1, limit: int = 10) -> ListaInmueblesResponse:
+    def listar_inmuebles(self, torre=None, estado=None, nombre_propietario=None, page=1, limit=10):
         
         if estado and estado not in ["disponible", "ocupado", "mantenimiento"]:
             raise HTTPException(
@@ -37,12 +41,18 @@ class InmuebleService:
                 detail="El estado debe ser: disponible, ocupado o mantenimiento"
             )
         
-        inmuebles, total = self.repo.listar_con_filtros(torre, estado, page, limit)
+        inmuebles, total = self.repo.listar_con_filtros(torre, estado, nombre_propietario, page, limit)
         
         total_paginas = (total + limit - 1) // limit if total > 0 else 0
         
+        inmuebles_con_propietario = []
+        for inmueble in inmuebles:
+            inmuebles_con_propietario.append(
+                InmuebleConPropietario(**inmueble.dict())
+            )
+        
         return ListaInmueblesResponse(
-            inmuebles=inmuebles,
+            inmuebles=inmuebles_con_propietario,
             paginacion=PaginacionInfo(
                 total=total,
                 page=page,

@@ -1,4 +1,3 @@
-# app/domain/models_domain.py
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
@@ -31,6 +30,17 @@ class InmuebleResponse(InmuebleBase):
         from_attributes = True
 
 
+class PropietarioInfo(BaseModel):
+    id_propietario: int
+    nombre_completo: str
+    email: str
+    telefono: str
+
+
+class InmuebleConPropietario(InmuebleResponse):
+    propietario: Optional[PropietarioInfo] = None
+
+
 class PaginacionInfo(BaseModel):
     total: int
     page: int
@@ -39,5 +49,5 @@ class PaginacionInfo(BaseModel):
 
 
 class ListaInmueblesResponse(BaseModel):
-    inmuebles: List[InmuebleResponse]
+    inmuebles: List[InmuebleConPropietario]
     paginacion: PaginacionInfo

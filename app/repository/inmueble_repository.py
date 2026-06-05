@@ -1,4 +1,3 @@
-# app/repository/inmueble_repository.py
 from typing import Optional, List, Dict
 from domain.models_domain import InmuebleResponse, InmuebleCreate, EstadoInmueble
 from datetime import datetime
@@ -24,9 +23,16 @@ class InmuebleRepository:
         self._next_id += 1
         return inmueble
 
-    def listar_con_filtros(self, torre: Optional[str] = None, estado: Optional[str] = None,
-                           page: int = 1, limit: int = 10) -> tuple[List[InmuebleResponse], int]:
-        
+    def get_by_id(self, inmueble_id: int) -> Optional[InmuebleResponse]:
+        return self._db.get(inmueble_id)
+
+    def exists_by_numero_torre(self, numero: str, torre: str) -> bool:
+        for inmueble in self._db.values():
+            if inmueble.numero == numero and inmueble.torre == torre:
+                return True
+        return False
+
+    def listar_con_filtros(self, torre=None, estado=None, nombre_propietario=None, page=1, limit=10):
         resultados = list(self._db.values())
         
         if torre:
@@ -40,5 +46,6 @@ class InmuebleRepository:
         total = len(resultados)
         start = (page - 1) * limit
         end = start + limit
+        paginados = resultados[start:end]
         
-        return resultados[start:end], total
+        return paginados, total
