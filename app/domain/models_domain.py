@@ -1,3 +1,4 @@
+# app/domain/models_domain.py
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
@@ -51,3 +52,8 @@ class PaginacionInfo(BaseModel):
 class ListaInmueblesResponse(BaseModel):
     inmuebles: List[InmuebleConPropietario]
     paginacion: PaginacionInfo
+
+
+# ==================== HU-005 (Asignación de propietario) ====================
+class AsignarPropietarioRequest(BaseModel):
+    id_propietario: int

@@ -10,7 +10,6 @@ app = FastAPI(
     swagger_ui_parameters={"persistAuthorization": True}
 )
 
-# Esto es necesario para que Swagger muestre el botón Authorize
 security = HTTPBearer()
 
 app.include_router(router)

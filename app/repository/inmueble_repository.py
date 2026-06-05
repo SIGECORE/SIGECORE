@@ -1,3 +1,4 @@
+# app/repository/inmueble_repository.py
 from typing import Optional, List, Dict
 from domain.models_domain import InmuebleResponse, InmuebleCreate, EstadoInmueble
 from datetime import datetime
@@ -49,3 +50,13 @@ class InmuebleRepository:
         paginados = resultados[start:end]
         
         return paginados, total
+
+    # ==================== HU-005 (Asignación de propietario) ====================
+    def asignar_propietario(self, inmueble_id: int, id_propietario: int):
+        inmueble = self._db.get(inmueble_id)
+        if not inmueble:
+            return None
+        
+        inmueble.id_propietario = id_propietario
+        inmueble.estado = EstadoInmueble.OCUPADO
+        return inmueble
