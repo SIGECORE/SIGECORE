@@ -1,6 +1,5 @@
-# app/domain/models_domain.py
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from enum import Enum
 
@@ -21,7 +20,7 @@ class InmuebleCreate(InmuebleBase):
     pass
 
 
-class Inmueble(InmuebleBase):
+class InmuebleResponse(InmuebleBase):
     id_inmueble: int
     estado: EstadoInmueble
     fecha_registro: datetime
@@ -29,28 +28,26 @@ class Inmueble(InmuebleBase):
 
     class Config:
         from_attributes = True
-        
-class EstadoZona(str, Enum):
-    DISPONIBLE = "disponible"
-    MANTENIMIENTO = "mantenimiento"
 
 
-class ZonaBase(BaseModel):
-    nombre: str
-    capacidad_maxima: int
-    descripcion: Optional[str] = None
-    horario_inicio: Optional[str] = None
-    horario_fin: Optional[str] = None
+class PropietarioInfo(BaseModel):
+    id_propietario: int
+    nombre_completo: str
+    email: str
+    telefono: str
 
 
-class ZonaCreate(ZonaBase):
-    pass
+class InmuebleConPropietario(InmuebleResponse):
+    propietario: Optional[PropietarioInfo] = None
 
 
-class ZonaResponse(ZonaBase):
-    id_zona: int
-    estado: EstadoZona
-    fecha_registro: datetime
+class PaginacionInfo(BaseModel):
+    total: int
+    page: int
+    limit: int
+    total_paginas: int
 
-    class Config:
-        from_attributes = True        
+
+class ListaInmueblesResponse(BaseModel):
+    inmuebles: List[InmuebleConPropietario]
+    paginacion: PaginacionInfo
