@@ -11,22 +11,21 @@ class EstadoInmueble(str, Enum):
     MANTENIMIENTO = "mantenimiento"
 
 
-class PropietarioInfo(BaseModel):
-    id_propietario: int
-    nombre_completo: str
-    email: str
-    telefono: str
-
-
-class Inmueble(BaseModel):
-    id_inmueble: int
+class InmuebleBase(BaseModel):
     numero: str
     torre: str
     area_m2: float
+
+
+class InmuebleCreate(InmuebleBase):
+    pass
+
+
+class InmuebleResponse(InmuebleBase):
+    id_inmueble: int
     estado: EstadoInmueble
     fecha_registro: datetime
     id_propietario: Optional[int] = None
-    propietario: Optional[PropietarioInfo] = None
 
     class Config:
         from_attributes = True
@@ -40,5 +39,5 @@ class PaginacionInfo(BaseModel):
 
 
 class ListaInmueblesResponse(BaseModel):
-    inmuebles: List[Inmueble]
+    inmuebles: List[InmuebleResponse]
     paginacion: PaginacionInfo
