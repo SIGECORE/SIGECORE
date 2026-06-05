@@ -6,3 +6,4 @@ __pycache__/
 .env.example 
 Comandos Github 
 app_backup/ 
+__pycache__/ 
