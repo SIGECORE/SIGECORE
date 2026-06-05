@@ -11,6 +11,12 @@ class EstadoInmueble(str, Enum):
     MANTENIMIENTO = "mantenimiento"
 
 
+class EstadoPago(str, Enum):
+    CONFIRMADO = "confirmado"
+    RECHAZADO = "rechazado"
+    PENDIENTE = "pendiente"
+
+
 class InmuebleBase(BaseModel):
     numero: str
     torre: str
@@ -29,6 +35,10 @@ class InmuebleResponse(InmuebleBase):
 
     class Config:
         from_attributes = True
+
+
+class AsignarPropietarioRequest(BaseModel):
+    id_propietario: int
 
 
 class PropietarioInfo(BaseModel):
@@ -54,6 +64,22 @@ class ListaInmueblesResponse(BaseModel):
     paginacion: PaginacionInfo
 
 
-# ==================== HU-005 (Asignación de propietario) ====================
-class AsignarPropietarioRequest(BaseModel):
-    id_propietario: int
+class PagoRequest(BaseModel):
+    id_inmueble: int
+    monto: float
+    metodo_pago: str
+    token_pasarela: str
+
+
+class PagoResponse(BaseModel):
+    id_pago: int
+    id_usuario: int
+    id_inmueble: int
+    monto: float
+    metodo_pago: str
+    estado: EstadoPago
+    fecha_pago: datetime
+    comprobante_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True

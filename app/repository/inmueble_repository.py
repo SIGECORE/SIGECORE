@@ -51,7 +51,6 @@ class InmuebleRepository:
         
         return paginados, total
 
-    # ==================== HU-005 (Asignación de propietario) ====================
     def asignar_propietario(self, inmueble_id: int, id_propietario: int):
         inmueble = self._db.get(inmueble_id)
         if not inmueble:
