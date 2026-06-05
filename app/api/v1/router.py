@@ -2,9 +2,9 @@
 from fastapi import APIRouter, status, Request, HTTPException
 import jwt
 
-from domain.models_domain import InmuebleCreate, Inmueble
-from service.inmueble_service import InmuebleService
-from repository.inmueble_repository import InmuebleRepository
+from domain.models_domain import ZonaCreate, ZonaResponse
+from service.zona_service import ZonaService
+from repository.zona_repository import ZonaRepository
 
 
 SECRET_KEY = "mi_clave_secreta"
@@ -22,15 +22,14 @@ def validar_token(token: str) -> dict:
         return None
 
 
-repo = InmuebleRepository()
-service = InmuebleService(repo)
+zona_repo = ZonaRepository()
+zona_service = ZonaService(zona_repo)
 
-router = APIRouter(prefix="/inmuebles", tags=["inmuebles"])
+router = APIRouter(prefix="/zonas", tags=["Zonas Comunes"])
 
 
-@router.post("/", response_model=Inmueble, status_code=status.HTTP_201_CREATED)
-def create_inmueble(data: InmuebleCreate, request: Request):
-    
+@router.post("/", response_model=ZonaResponse, status_code=status.HTTP_201_CREATED)
+def registrar_zona(data: ZonaCreate, request: Request):
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         raise HTTPException(
@@ -47,4 +46,4 @@ def create_inmueble(data: InmuebleCreate, request: Request):
             detail="Token inválido o expirado"
         )
     
-    return service.create_inmueble(data, usuario)
+    return zona_service.registrar_zona(data, usuario)
