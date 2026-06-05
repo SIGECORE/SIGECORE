@@ -1,6 +1,6 @@
 # main.py
 from fastapi import FastAPI
-from app.api.v1.router import router
+from api.v1.router import router
 
 app = FastAPI(
     title="SIGECORE API",

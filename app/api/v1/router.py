@@ -12,13 +12,13 @@ from fastapi.responses import JSONResponse
 import bcrypt
 import jwt
 
-from app.domain.models_domain import (
+from domain.models_domain import (
     UsuarioCreate,
     LoginRequest
 )
 
-from app.service.usuario_service import UsuarioService
-from app.repository.usuario_repository import UsuarioRepository
+from service.usuario_service import UsuarioService
+from repository.usuario_repository import UsuarioRepository
 
 
 SECRET_KEY = "mi_clave_secreta"
