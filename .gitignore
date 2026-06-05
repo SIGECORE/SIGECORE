@@ -1,3 +1,10 @@
+__pycache__/ 
+*.pyc 
+<<<<<<< HEAD
+=======
+venv/ 
+.env 
+*.db 
 venv/ 
 Documentacion/ 
 __pycache__/ 
@@ -6,3 +13,4 @@ __pycache__/
 .env.example 
 Comandos Github 
 app_backup/ 
+>>>>>>> hu-004-Registro-de-Inmuebles

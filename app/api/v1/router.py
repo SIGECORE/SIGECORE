@@ -1,17 +1,23 @@
 # app/api/v1/router.py
-from fastapi import APIRouter, Request, HTTPException, Depends
-from sqlalchemy.orm import Session
+from typing import Optional
+from fastapi import APIRouter, status, HTTPException, Query, Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel
 import jwt
 
-from database import get_db
-from schemas import AsignarPropietarioRequest, InmuebleResponse
+from domain.models_domain import (
+    InmuebleCreate, InmuebleResponse, ListaInmueblesResponse,
+    AsignarPropietarioRequest
+)
 from service.inmueble_service import InmuebleService
 from repository.inmueble_repository import InmuebleRepository
 
 
 SECRET_KEY = "mi_clave_secreta"
 
-def validar_token(token: str) -> dict:
+security = HTTPBearer()
+
+def validar_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         return {
@@ -24,32 +30,60 @@ def validar_token(token: str) -> dict:
         return None
 
 
-router = APIRouter(prefix="/inmuebles", tags=["inmuebles"])
+repo = InmuebleRepository()
+service = InmuebleService(repo)
+
+router = APIRouter()
 
 
-@router.patch("/{inmueble_id}/propietario", response_model=InmuebleResponse)
-def asignar_propietario(
-    inmueble_id: int, 
-    data: AsignarPropietarioRequest, 
-    request: Request, 
-    db: Session = Depends(get_db)
-):
-    auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        raise HTTPException(
-            status_code=401,
-            detail="Token de autenticación requerido"
-        )
-    
-    token = auth_header.split(" ")[1] if " " in auth_header else auth_header
+# ==================== HU-004 (Registro de inmuebles) ====================
+@router.post("/inmuebles", response_model=InmuebleResponse, status_code=status.HTTP_201_CREATED)
+def create_inmueble(data: InmuebleCreate, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
     usuario = validar_token(token)
-    
     if not usuario:
-        raise HTTPException(
-            status_code=401,
-            detail="Token inválido o expirado"
-        )
+        raise HTTPException(status_code=401, detail="Token inválido")
     
-    repo = InmuebleRepository(db)
-    service = InmuebleService(repo)
+    if usuario.get('id_rol') != 1:
+        raise HTTPException(status_code=403, detail="Acceso denegado. Se requiere rol de administrador")
+    
+    return service.create_inmueble(data, usuario)
+
+
+# ==================== HU-006 (Consulta de inmuebles) ====================
+@router.get("/inmuebles", response_model=ListaInmueblesResponse)
+def listar_inmuebles(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    torre: str = Query(None, description="Filtrar por torre"),
+    estado: str = Query(None, description="Filtrar por estado"),
+    nombre_propietario: str = Query(None, description="Filtrar por nombre del propietario"),
+    page: int = Query(1, ge=1, description="Número de página"),
+    limit: int = Query(10, ge=1, le=100, description="Elementos por página")
+):
+    token = credentials.credentials
+    usuario = validar_token(token)
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Token inválido")
+    
+    if usuario.get('id_rol') != 1:
+        raise HTTPException(status_code=403, detail="Acceso denegado. Se requiere rol de administrador")
+    
+    return service.listar_inmuebles(torre, estado, nombre_propietario, page, limit)
+
+
+# ==================== HU-005 (Asignación de propietario) ====================
+@router.patch("/inmuebles/{inmueble_id}/propietario", response_model=InmuebleResponse)
+def asignar_propietario(
+    inmueble_id: int,
+    data: AsignarPropietarioRequest,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    token = credentials.credentials
+    usuario = validar_token(token)
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Token inválido")
+    
+    if usuario.get('id_rol') != 1:
+        raise HTTPException(status_code=403, detail="Acceso denegado. Se requiere rol de administrador")
+    
     return service.asignar_propietario(inmueble_id, data.id_propietario, usuario)

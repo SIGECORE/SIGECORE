@@ -1,6 +1,6 @@
 # app/domain/models_domain.py
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from enum import Enum
 
@@ -21,6 +21,16 @@ class InmuebleCreate(InmuebleBase):
     pass
 
 
+class InmuebleResponse(InmuebleBase):
+    id_inmueble: int
+    estado: EstadoInmueble
+    fecha_registro: datetime
+    id_propietario: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+
 class PropietarioInfo(BaseModel):
     id_propietario: int
     nombre_completo: str
@@ -28,16 +38,22 @@ class PropietarioInfo(BaseModel):
     telefono: str
 
 
-class Inmueble(InmuebleBase):
-    id_inmueble: int
-    estado: EstadoInmueble
-    fecha_registro: datetime
-    id_propietario: Optional[int] = None
+class InmuebleConPropietario(InmuebleResponse):
     propietario: Optional[PropietarioInfo] = None
 
-    class Config:
-        from_attributes = True
+
+class PaginacionInfo(BaseModel):
+    total: int
+    page: int
+    limit: int
+    total_paginas: int
 
 
+class ListaInmueblesResponse(BaseModel):
+    inmuebles: List[InmuebleConPropietario]
+    paginacion: PaginacionInfo
+
+
+# ==================== HU-005 (Asignación de propietario) ====================
 class AsignarPropietarioRequest(BaseModel):
     id_propietario: int
