@@ -9,7 +9,3 @@ app = FastAPI(
 )
 
 app.include_router(router)
-
-@app.get("/")
-def root():
-    return {"message": "¡API de SIGECORE funcionando! 🚀"}

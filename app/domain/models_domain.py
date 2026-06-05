@@ -5,27 +5,27 @@ from datetime import datetime
 from enum import Enum
 
 
-class EstadoInmueble(str, Enum):
+class EstadoZona(str, Enum):
     DISPONIBLE = "disponible"
-    OCUPADO = "ocupado"
     MANTENIMIENTO = "mantenimiento"
 
 
-class InmuebleBase(BaseModel):
-    numero: str
-    torre: str
-    area_m2: float
+class ZonaBase(BaseModel):
+    nombre: str
+    capacidad_maxima: int
+    descripcion: Optional[str] = None
+    horario_inicio: Optional[str] = None
+    horario_fin: Optional[str] = None
 
 
-class InmuebleCreate(InmuebleBase):
+class ZonaCreate(ZonaBase):
     pass
 
 
-class Inmueble(InmuebleBase):
-    id_inmueble: int
-    estado: EstadoInmueble
+class ZonaResponse(ZonaBase):
+    id_zona: int
+    estado: EstadoZona
     fecha_registro: datetime
-    id_propietario: Optional[int] = None
 
     class Config:
         from_attributes = True
