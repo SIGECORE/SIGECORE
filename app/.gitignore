@@ -1,0 +1,8 @@
+venv/ 
+Documentacion/ 
+__pycache__/ 
+*.pyc 
+*.db 
+.env.example 
+Comandos Github 
+app_backup/ 
