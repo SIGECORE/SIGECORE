@@ -1,107 +1,53 @@
+# app/service/comunicado_service.py
 from datetime import datetime
-
-from fastapi import HTTPException
+from fastapi import HTTPException, status
+from domain.models_domain import ComunicadoCreate, ComunicadoResponse
+from repository.comunicado_repository import ComunicadoRepository
 
 
 class ComunicadoService:
 
-    def __init__(
-        self,
-        repository
-    ):
-        self.repository = repository
+    def __init__(self, repo: ComunicadoRepository):
+        self.repo = repo
 
-    def publicar_comunicado(
-        self,
-        data,
-        usuario
-    ):
-
-        # Solo administradores
-        if usuario["id_rol"] != 1:
-
+    def publicar_comunicado(self, data: ComunicadoCreate, usuario_autenticado: dict) -> ComunicadoResponse:
+        
+        # Validar campos obligatorios
+        if not data.titulo or not data.contenido:
             raise HTTPException(
-                status_code=403,
-                detail={
-                    "success": False,
-                    "statusCode": 403,
-                    "message": "Acceso denegado",
-                    "error": {
-                        "error_code": "ACCESO_DENEGADO",
-                        "details": "Se requiere rol de administrador para publicar comunicados",
-                        "timestamp": datetime.utcnow().isoformat()
-                    }
-                }
-            )
-
-        # Validar título
-        if not data.titulo.strip():
-
-            raise HTTPException(
-                status_code=400,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
                     "success": False,
                     "statusCode": 400,
                     "message": "Error en la solicitud",
                     "error": {
                         "error_code": "CAMPO_REQUERIDO",
-                        "details": "El campo titulo es obligatorio",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "details": "Los campos titulo y contenido son obligatorios",
+                        "timestamp": datetime.now().isoformat()
                     }
                 }
             )
-
-        # Validar contenido
-        if not data.contenido.strip():
-
+        
+        # Validar fecha de expiración (si se envía)
+        if data.fecha_expiracion and data.fecha_expiracion < datetime.now():
             raise HTTPException(
-                status_code=400,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
                     "success": False,
                     "statusCode": 400,
                     "message": "Error en la solicitud",
                     "error": {
-                        "error_code": "CAMPO_REQUERIDO",
-                        "details": "El campo contenido es obligatorio",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "error_code": "FECHA_EXPIRACION_INVALIDA",
+                        "details": "La fecha de expiración no puede ser anterior a la fecha actual",
+                        "timestamp": datetime.now().isoformat()
                     }
                 }
             )
+        
+        id_autor = usuario_autenticado.get('id_usuario')
+        autor_nombre = usuario_autenticado.get('nombre_completo', f"Usuario {id_autor}")
+        
+        return self.repo.create(data, id_autor, autor_nombre)
 
-        # Validar fecha de expiración
-        if data.fecha_expiracion:
-
-            fecha_exp = data.fecha_expiracion
-
-            if fecha_exp.replace(
-                tzinfo=None
-            ) < datetime.utcnow():
-
-                raise HTTPException(
-                    status_code=400,
-                    detail={
-                        "success": False,
-                        "statusCode": 400,
-                        "message": "Error en la solicitud",
-                        "error": {
-                            "error_code": "FECHA_EXPIRACION_INVALIDA",
-                            "details": "La fecha de expiración no puede ser anterior a la fecha actual",
-                            "timestamp": datetime.utcnow().isoformat()
-                        }
-                    }
-                )
-
-        comunicado = {
-            "titulo": data.titulo,
-            "contenido": data.contenido,
-            "id_autor": usuario["id_usuario"],
-            "autor_nombre": usuario["nombre_completo"],
-            "archivos_adjuntos": data.archivos_adjuntos,
-            "fecha_publicacion": datetime.utcnow(),
-            "fecha_expiracion": data.fecha_expiracion,
-            "activo": True
-        }
-
-        return self.repository.create(
-            comunicado
-        )
+    def listar_comunicados_activos(self) -> list[ComunicadoResponse]:
+        return self.repo.get_activos()

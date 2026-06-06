@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from datetime import datetime
 
 from fastapi import (
@@ -6,9 +7,18 @@ from fastapi import (
     HTTPException,
     status
 )
+=======
+# app/api/v1/router.py
+from fastapi import APIRouter
+from api.v1.usuarios import router as usuarios_router
+from api.v1.inmuebles import router as inmuebles_router
+from api.v1.pagos import router as pagos_router
+from api.v1.zonas import router as zonas_router
+>>>>>>> 4a10eb2360e7de6d26d420d32c106822219cce6f
 
-from fastapi.responses import JSONResponse
+router = APIRouter()
 
+<<<<<<< HEAD
 import jwt
 
 from domain.models_domain import (
@@ -148,3 +158,10 @@ def publicar_comunicado(
             }
         }
     )
+=======
+# Incluir todos los routers
+router.include_router(usuarios_router)
+router.include_router(inmuebles_router)
+router.include_router(pagos_router)
+router.include_router(zonas_router)
+>>>>>>> 4a10eb2360e7de6d26d420d32c106822219cce6f
