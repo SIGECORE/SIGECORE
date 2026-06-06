@@ -1,7 +1,7 @@
 # app/main.py
 from fastapi import FastAPI
 from fastapi.security import HTTPBearer
-from api.v1.usuarios import router
+from api.v1.comunicados import router
 
 app = FastAPI(
     title="SIGECORE API",
