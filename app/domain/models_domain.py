@@ -85,8 +85,6 @@ class PagoResponse(BaseModel):
         from_attributes = True
 
 
-# ==================== HU-016 (Historial de pagos por usuario) ====================
-
 class UsuarioInfo(BaseModel):
     id_usuario: int
     nombre_completo: str
@@ -112,3 +110,35 @@ class PagoHistorialResponse(BaseModel):
 class HistorialPagosResponse(BaseModel):
     usuario: UsuarioInfo
     pagos: List[PagoHistorialResponse]
+
+
+# ==================== HU-017 (Reporte de cartera) ====================
+
+class InmuebleCartera(BaseModel):
+    id_inmueble: int
+    numero: str
+    torre: str
+    area_m2: float
+
+
+class PropietarioCartera(BaseModel):
+    id_propietario: int
+    nombre_completo: str
+    email: str
+    telefono: str
+
+
+class ItemCartera(BaseModel):
+    inmueble: InmuebleCartera
+    propietario: PropietarioCartera
+    meses_mora: int
+    valor_cuota: float
+    total_adeudado: float
+    ultimo_pago: Optional[str] = None
+
+
+class ReporteCarteraResponse(BaseModel):
+    fecha_generacion: datetime
+    total_morosos: int
+    total_adeudado: float
+    cartera: List[ItemCartera]

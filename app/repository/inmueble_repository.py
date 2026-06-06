@@ -10,6 +10,7 @@ class InmuebleRepository:
         self._db: Dict[int, InmuebleResponse] = {}
         self._next_id: int = 1
 
+    # ==================== HU-004 (Registro de inmuebles) ====================
     def create(self, data: InmuebleCreate) -> InmuebleResponse:
         inmueble = InmuebleResponse(
             id_inmueble=self._next_id,
@@ -33,6 +34,17 @@ class InmuebleRepository:
                 return True
         return False
 
+    # ==================== HU-005 (Asignación de propietario) ====================
+    def asignar_propietario(self, inmueble_id: int, id_propietario: int):
+        inmueble = self._db.get(inmueble_id)
+        if not inmueble:
+            return None
+        
+        inmueble.id_propietario = id_propietario
+        inmueble.estado = EstadoInmueble.OCUPADO
+        return inmueble
+
+    # ==================== HU-006 (Consulta de inmuebles) ====================
     def listar_con_filtros(self, torre=None, estado=None, nombre_propietario=None, page=1, limit=10):
         resultados = list(self._db.values())
         
@@ -51,11 +63,6 @@ class InmuebleRepository:
         
         return paginados, total
 
-    def asignar_propietario(self, inmueble_id: int, id_propietario: int):
-        inmueble = self._db.get(inmueble_id)
-        if not inmueble:
-            return None
-        
-        inmueble.id_propietario = id_propietario
-        inmueble.estado = EstadoInmueble.OCUPADO
-        return inmueble
+    # ==================== HU-017 (Reporte de cartera) ====================
+    def get_all_inmuebles(self) -> List[InmuebleResponse]:
+        return list(self._db.values())

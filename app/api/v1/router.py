@@ -11,10 +11,12 @@ from domain.models_domain import (
     AsignarPropietarioRequest,
     PagoRequest,
     PagoResponse,
-    HistorialPagosResponse
+    HistorialPagosResponse,
+    ReporteCarteraResponse
 )
 from service.inmueble_service import InmuebleService
 from service.pago_service import PagoService
+from service.reporte_service import ReporteService
 from repository.inmueble_repository import InmuebleRepository
 from repository.pago_repository import PagoRepository
 
@@ -38,6 +40,7 @@ def validar_token(token: str):
 
 # Repositorios y servicios (compartidos)
 inmueble_repo = InmuebleRepository()
+pago_repo = PagoRepository()
 inmueble_service = InmuebleService(inmueble_repo)
 
 router = APIRouter()
@@ -107,9 +110,7 @@ def registrar_pago(
     if not usuario:
         raise HTTPException(status_code=401, detail="Token inválido")
     
-    pago_repo = PagoRepository()
     pago_service = PagoService(pago_repo, inmueble_repo)
-    
     return pago_service.registrar_pago(data, usuario)
 
 
@@ -124,7 +125,21 @@ def obtener_historial_pagos(
     if not usuario:
         raise HTTPException(status_code=401, detail="Token inválido")
     
-    pago_repo = PagoRepository()
     pago_service = PagoService(pago_repo, inmueble_repo)
-    
     return pago_service.obtener_historial_pagos(usuario_id, usuario)
+
+
+# ==================== HU-017 (Reporte de cartera) ====================
+@router.get("/pagos/reporte-cartera", response_model=ReporteCarteraResponse)
+def reporte_cartera(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    torre: str = Query(None, description="Filtrar por torre"),
+    meses_mora: int = Query(None, description="Filtrar por meses de mora mínimos")
+):
+    token = credentials.credentials
+    usuario = validar_token(token)
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Token inválido")
+    
+    reporte_service = ReporteService(inmueble_repo, pago_repo)
+    return reporte_service.generar_reporte_cartera(usuario, torre, meses_mora)
