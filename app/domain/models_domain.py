@@ -1,28 +1,56 @@
 # app/domain/models_domain.py
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 from datetime import datetime
-from enum import Enum
 
 
-class EstadoInmueble(str, Enum):
-    DISPONIBLE = "disponible"
-    OCUPADO = "ocupado"
-    MANTENIMIENTO = "mantenimiento"
+# ==================== HU-001 (Usuario base) ====================
+
+class UsuarioResponse(BaseModel):
+    id_usuario: int
+    nombre_completo: str
+    email: str
+    telefono: str
+    id_rol: int
+    activo: int
+    fecha_registro: datetime
+    intentos_fallidos: Optional[int] = 0
+    bloqueado_hasta: Optional[datetime] = None
+    ultimo_login: Optional[datetime] = None
 
 
-class EstadoPago(str, Enum):
-    CONFIRMADO = "confirmado"
-    RECHAZADO = "rechazado"
-    PENDIENTE = "pendiente"
+# ==================== HU-002 (Inicio de sesión) ====================
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
 
-class EstadoZona(str, Enum):
-    DISPONIBLE = "disponible"
-    MANTENIMIENTO = "mantenimiento"
+class LoginResponse(BaseModel):
+    success: bool
+    statusCode: int
+    message: str
+    data: dict
 
 
-# ==================== INMUEBLES ====================
+# ==================== HU-003 (Asignación de roles) ====================
+
+class AsignarRolRequest(BaseModel):
+    id_rol: int
+
+
+class AuditoriaRolResponse(BaseModel):
+    id_auditoria: int
+    id_usuario_modificado: int
+    rol_anterior: int
+    rol_nuevo: int
+    id_usuario_modificador: int
+    fecha_modificacion: datetime
+    ip_origen: Optional[str] = None
+
+
+# ==================== HU-004 (Registro de inmuebles) ====================
+
 class InmuebleBase(BaseModel):
     numero: str
     torre: str
@@ -35,17 +63,18 @@ class InmuebleCreate(InmuebleBase):
 
 class InmuebleResponse(InmuebleBase):
     id_inmueble: int
-    estado: EstadoInmueble
+    estado: str
     fecha_registro: datetime
     id_propietario: Optional[int] = None
 
-    class Config:
-        from_attributes = True
 
+# ==================== HU-005 (Asignación de propietario) ====================
 
 class AsignarPropietarioRequest(BaseModel):
     id_propietario: int
 
+
+# ==================== HU-006 (Consulta de inmuebles) ====================
 
 class PropietarioInfo(BaseModel):
     id_propietario: int
@@ -70,86 +99,8 @@ class ListaInmueblesResponse(BaseModel):
     paginacion: PaginacionInfo
 
 
-# ==================== PAGOS ====================
-class PagoRequest(BaseModel):
-    id_inmueble: int
-    monto: float
-    metodo_pago: str
-    token_pasarela: str
+# ==================== HU-007 (Registro de zonas comunes) ====================
 
-
-class PagoResponse(BaseModel):
-    id_pago: int
-    id_usuario: int
-    id_inmueble: int
-    monto: float
-    metodo_pago: str
-    estado: EstadoPago
-    fecha_pago: datetime
-    comprobante_url: Optional[str] = None
-
-    class Config:
-        from_attributes = True
-
-
-class UsuarioInfo(BaseModel):
-    id_usuario: int
-    nombre_completo: str
-    email: str
-
-
-class InmuebleInfo(BaseModel):
-    id_inmueble: int
-    numero: str
-    torre: str
-
-
-class PagoHistorialResponse(BaseModel):
-    id_pago: int
-    inmueble: InmuebleInfo
-    monto: float
-    metodo_pago: str
-    estado: EstadoPago
-    fecha_pago: datetime
-    comprobante_url: Optional[str] = None
-
-
-class HistorialPagosResponse(BaseModel):
-    usuario: UsuarioInfo
-    pagos: List[PagoHistorialResponse]
-
-
-class InmuebleCartera(BaseModel):
-    id_inmueble: int
-    numero: str
-    torre: str
-    area_m2: float
-
-
-class PropietarioCartera(BaseModel):
-    id_propietario: int
-    nombre_completo: str
-    email: str
-    telefono: str
-
-
-class ItemCartera(BaseModel):
-    inmueble: InmuebleCartera
-    propietario: PropietarioCartera
-    meses_mora: int
-    valor_cuota: float
-    total_adeudado: float
-    ultimo_pago: Optional[str] = None
-
-
-class ReporteCarteraResponse(BaseModel):
-    fecha_generacion: datetime
-    total_morosos: int
-    total_adeudado: float
-    cartera: List[ItemCartera]
-
-
-# ==================== ZONAS COMUNES ====================
 class ZonaBase(BaseModel):
     nombre: str
     capacidad_maxima: int
@@ -164,12 +115,11 @@ class ZonaCreate(ZonaBase):
 
 class ZonaResponse(ZonaBase):
     id_zona: int
-    estado: EstadoZona
+    estado: str
     fecha_registro: datetime
 
-    class Config:
-        from_attributes = True
 
+# ==================== HU-008 (Consulta disponibilidad zonas) ====================
 
 class ZonaInfo(BaseModel):
     zona_id: int
@@ -200,79 +150,82 @@ class DisponibilidadResponse(BaseModel):
     data: DisponibilidadData
 
 
-# ==================== USUARIOS (HU-001 y HU-002) ====================
-class UsuarioCreate(BaseModel):
-    nombre_completo: str
-    email: str
-    telefono: str
-    password: str
-    id_rol: int
+# ==================== HU-015 (Registro de pago) ====================
+
+class PagoRequest(BaseModel):
+    id_inmueble: int
+    monto: float
+    metodo_pago: str
+    token_pasarela: str
 
 
-class UsuarioResponse(BaseModel):
+class PagoResponse(BaseModel):
+    id_pago: int
+    id_usuario: int
+    id_inmueble: int
+    monto: float
+    metodo_pago: str
+    estado: str
+    fecha_pago: datetime
+    comprobante_url: Optional[str] = None
+
+
+# ==================== HU-016 (Historial de pagos) ====================
+
+class UsuarioInfo(BaseModel):
     id_usuario: int
     nombre_completo: str
     email: str
-    telefono: str
-    id_rol: int
-    activo: int
-    fecha_registro: datetime
-    intentos_fallidos: Optional[int] = 0
-    bloqueado_hasta: Optional[datetime] = None
-    ultimo_login: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
-class LoginRequest(BaseModel):
-    email: str
-    password: str
+class InmuebleInfo(BaseModel):
+    id_inmueble: int
+    numero: str
+    torre: str
 
 
-class UsuarioLoginResponse(BaseModel):
-    id_usuario: int
-    nombre_completo: str
-    email: str
-    id_rol: int
-    rol_nombre: str
+class PagoHistorialResponse(BaseModel):
+    id_pago: int
+    inmueble: InmuebleInfo
+    monto: float
+    metodo_pago: str
+    estado: str
+    fecha_pago: datetime
+    comprobante_url: Optional[str] = None
 
 
-class LoginResponse(BaseModel):
-    success: bool
-    statusCode: int
-    message: str
-    data: dict
+class HistorialPagosResponse(BaseModel):
+    usuario: UsuarioInfo
+    pagos: List[PagoHistorialResponse]
 
 
-# app/domain/models_domain.py
-from pydantic import BaseModel
-from typing import Optional
-from datetime import datetime
+# ==================== HU-017 (Reporte de cartera) ====================
+
+class InmuebleCartera(BaseModel):
+    id_inmueble: int
+    numero: str
+    torre: str
+    area_m2: float
 
 
-# ==================== HU-002 (Inicio de sesión) ====================
-
-class LoginRequest(BaseModel):
-    email: str
-    password: str
-
-
-class LoginResponse(BaseModel):
-    success: bool
-    statusCode: int
-    message: str
-    data: dict
-
-
-class UsuarioResponse(BaseModel):
-    id_usuario: int
+class PropietarioCartera(BaseModel):
+    id_propietario: int
     nombre_completo: str
     email: str
     telefono: str
-    id_rol: int
-    activo: int
-    fecha_registro: datetime
-    intentos_fallidos: Optional[int] = 0
-    bloqueado_hasta: Optional[datetime] = None
-    ultimo_login: Optional[datetime] = None
+
+
+class ItemCartera(BaseModel):
+    inmueble: InmuebleCartera
+    propietario: PropietarioCartera
+    meses_mora: int
+    valor_cuota: float
+    total_adeudado: float
+    ultimo_pago: Optional[str] = None
+
+
+class ReporteCarteraResponse(BaseModel):
+    fecha_generacion: datetime
+    total_morosos: int
+    total_adeudado: float
+    cartera: List[ItemCartera]

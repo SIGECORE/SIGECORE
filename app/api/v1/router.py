@@ -1,4 +1,3 @@
-# app/api/v1/router.py
 from fastapi import APIRouter
 from api.v1.usuarios import router as usuarios_router
 from api.v1.inmuebles import router as inmuebles_router
