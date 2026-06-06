@@ -1,6 +1,6 @@
 # app/domain/models_domain.py
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 
@@ -148,6 +148,30 @@ class DisponibilidadResponse(BaseModel):
     statusCode: int
     message: str
     data: DisponibilidadData
+
+
+# ==================== HU-013 (Publicación de comunicados) ====================
+
+class ComunicadoBase(BaseModel):
+    titulo: str
+    contenido: str
+    archivos_adjuntos: Optional[List[str]] = None
+    fecha_expiracion: Optional[datetime] = None
+
+
+class ComunicadoCreate(ComunicadoBase):
+    pass
+
+
+class ComunicadoResponse(ComunicadoBase):
+    id_comunicado: int
+    id_autor: int
+    autor_nombre: str
+    fecha_publicacion: datetime
+    activo: bool
+
+    class Config:
+        from_attributes = True
 
 
 # ==================== HU-015 (Registro de pago) ====================
