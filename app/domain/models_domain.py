@@ -83,3 +83,32 @@ class PagoResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ==================== HU-016 (Historial de pagos por usuario) ====================
+
+class UsuarioInfo(BaseModel):
+    id_usuario: int
+    nombre_completo: str
+    email: str
+
+
+class InmuebleInfo(BaseModel):
+    id_inmueble: int
+    numero: str
+    torre: str
+
+
+class PagoHistorialResponse(BaseModel):
+    id_pago: int
+    inmueble: InmuebleInfo
+    monto: float
+    metodo_pago: str
+    estado: EstadoPago
+    fecha_pago: datetime
+    comprobante_url: Optional[str] = None
+
+
+class HistorialPagosResponse(BaseModel):
+    usuario: UsuarioInfo
+    pagos: List[PagoHistorialResponse]

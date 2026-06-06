@@ -12,7 +12,6 @@ class InmuebleService:
     def __init__(self, repo: InmuebleRepository):
         self.repo = repo
 
-    # ==================== HU-004 (Registro de inmuebles) ====================
     def create_inmueble(self, data: InmuebleCreate, usuario_autenticado: dict) -> InmuebleResponse:
         
         if usuario_autenticado.get('id_rol') != 1:
@@ -35,7 +34,6 @@ class InmuebleService:
 
         return self.repo.create(data)
 
-    # ==================== HU-006 (Consulta de inmuebles) ====================
     def listar_inmuebles(self, torre=None, estado=None, nombre_propietario=None, page=1, limit=10):
         
         if estado and estado not in ["disponible", "ocupado", "mantenimiento"]:
@@ -64,19 +62,13 @@ class InmuebleService:
             )
         )
 
-    # ==================== HU-005 (Asignación de propietario) ====================
     def asignar_propietario(self, inmueble_id: int, id_propietario: int, usuario_autenticado: dict):
         
-        # Verificar que el inmueble existe
         inmueble = self.repo.get_by_id(inmueble_id)
         if not inmueble:
             raise HTTPException(status_code=404, detail=f"Inmueble con ID {inmueble_id} no encontrado")
         
-        # Verificar que no tenga ya un propietario
         if inmueble.id_propietario is not None:
             raise HTTPException(status_code=400, detail="El inmueble ya tiene un propietario asignado")
-        
-        # TODO: Validar que el usuario (id_propietario) existe en la tabla de usuarios
-        # Por ahora simulamos que existe
         
         return self.repo.asignar_propietario(inmueble_id, id_propietario)

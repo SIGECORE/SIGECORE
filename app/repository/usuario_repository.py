@@ -1,3 +1,17 @@
+<<<<<<< HEAD
+# app/repository/usuario_repository.py
+from sqlalchemy.orm import Session
+from models import Usuario as UsuarioModel
+
+
+class UsuarioRepository:
+    
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_by_id(self, usuario_id: int):
+        return self.db.query(UsuarioModel).filter(UsuarioModel.id_usuario == usuario_id).first()
+=======
 # repository/usuario_repository.py
 
 from typing import Optional, List
@@ -76,3 +90,4 @@ class UsuarioRepository:
 
     def obtener_password_hash(self, id_usuario: int) -> Optional[str]:
         return self._passwords.get(id_usuario)
+>>>>>>> 4141413e2aafba34c1f755d6873d474a052b4c43
