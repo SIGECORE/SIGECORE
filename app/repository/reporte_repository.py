@@ -24,3 +24,26 @@ class ReporteRepository:
         self._db[self._next_id] = reporte
         self._next_id += 1
         return reporte
+
+    def get_by_id(self, reporte_id: int) -> Optional[ReporteResponse]:
+        return self._db.get(reporte_id)
+
+    def get_all(self) -> List[ReporteResponse]:
+        return list(self._db.values())
+
+    def update_estado(self, reporte_id: int, estado: str, observaciones: str = None, 
+                      id_responsable: int = None) -> Optional[ReporteResponse]:
+        reporte = self._db.get(reporte_id)
+        if not reporte:
+            return None
+        
+        reporte.estado = estado
+        if observaciones:
+            reporte.observaciones = observaciones
+        if id_responsable:
+            reporte.id_responsable = id_responsable
+        
+        if estado == "resuelto":
+            reporte.fecha_resolucion = datetime.now()
+        
+        return reporte

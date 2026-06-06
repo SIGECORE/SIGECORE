@@ -1,11 +1,16 @@
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
 >>>>>>> e610f025d06aa9c255563bd80874e3d412c1aba6
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
 from datetime import (
     datetime,
     timedelta
 )
+<<<<<<< HEAD
+=======
 <<<<<<< HEAD
 
 import bcrypt
@@ -17,6 +22,7 @@ from fastapi import HTTPException
 SECRET_KEY = "mi_clave_secreta"
 =======
 >>>>>>> e610f025d06aa9c255563bd80874e3d412c1aba6
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
 
 import bcrypt
 import jwt
@@ -27,6 +33,8 @@ from fastapi import HTTPException
 SECRET_KEY = "mi_clave_secreta"
 
 ALGORITHM = "HS256"
+<<<<<<< HEAD
+=======
 =======
 # service/usuario_service.py
 from fastapi import HTTPException, status
@@ -42,6 +50,7 @@ INVALID_DATA = "INVALID_DATA"
 ROL_INVALIDO = "ROL_INVALIDO"
 ACCESO_DENEGADO = "ACCESO_DENEGADO"
 >>>>>>> 62197992c9e421bb975a958381525013c2d14f56
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
 
 
 class UsuarioService:
@@ -49,7 +58,10 @@ class UsuarioService:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
 >>>>>>> e610f025d06aa9c255563bd80874e3d412c1aba6
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
     def __init__(self, repository):
 
         self.repository = repository
@@ -65,6 +77,9 @@ class UsuarioService:
             raise HTTPException(
                 status_code=403,
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
                 detail={
                     "success": False,
                     "statusCode": 403,
@@ -126,6 +141,8 @@ class UsuarioService:
         )
 
         return usuario
+<<<<<<< HEAD
+=======
 =======
 =======
     def __init__(self, repo: UsuarioRepository):
@@ -220,6 +237,7 @@ class UsuarioService:
         )
 
         return usuario
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
 
     def login(
         self,
@@ -245,6 +263,8 @@ class UsuarioService:
                         "details": "El correo o la contraseña son incorrectos",
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
         # Validar longitud de contraseña
         if len(data.password) < 6:
@@ -259,6 +279,7 @@ class UsuarioService:
                         "details": "La contraseña debe tener mínimo 6 caracteres",
 >>>>>>> 62197992c9e421bb975a958381525013c2d14f56
 >>>>>>> e610f025d06aa9c255563bd80874e3d412c1aba6
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
                         "timestamp": datetime.utcnow().isoformat()
                     }
                 }
@@ -267,7 +288,10 @@ class UsuarioService:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
 >>>>>>> e610f025d06aa9c255563bd80874e3d412c1aba6
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
         if not usuario["activo"]:
 
             raise HTTPException(
@@ -279,6 +303,8 @@ class UsuarioService:
                     "error": {
                         "error_code": "USUARIO_INACTIVO",
                         "details": "La cuenta está desactivada",
+<<<<<<< HEAD
+=======
 <<<<<<< HEAD
 =======
 =======
@@ -295,6 +321,7 @@ class UsuarioService:
                         "details": "El rol debe ser 1 (administrador) o 2 (residente)",
 >>>>>>> 62197992c9e421bb975a958381525013c2d14f56
 >>>>>>> e610f025d06aa9c255563bd80874e3d412c1aba6
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
                         "timestamp": datetime.utcnow().isoformat()
                     }
                 }
@@ -303,7 +330,10 @@ class UsuarioService:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
 >>>>>>> e610f025d06aa9c255563bd80874e3d412c1aba6
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
         if (
             usuario["bloqueado_hasta"]
             and usuario["bloqueado_hasta"] > datetime.utcnow()
@@ -320,8 +350,12 @@ class UsuarioService:
 <<<<<<< HEAD
                         "details": "Demasiados intentos fallidos",
 =======
+<<<<<<< HEAD
+                        "details": "Demasiados intentos fallidos",
+=======
                         "details": "Cuenta bloqueada por demasiados intentos",
 >>>>>>> e610f025d06aa9c255563bd80874e3d412c1aba6
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
                         "timestamp": datetime.utcnow().isoformat()
                     }
                 }
@@ -336,6 +370,9 @@ class UsuarioService:
 
             usuario["intentos_fallidos"] += 1
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
 
             if usuario["intentos_fallidos"] >= 3:
 
@@ -348,6 +385,8 @@ class UsuarioService:
                 usuario
             )
 
+<<<<<<< HEAD
+=======
 =======
 
             if usuario["intentos_fallidos"] >= 3:
@@ -360,6 +399,7 @@ class UsuarioService:
             self.repository.actualizar(usuario)
 
 >>>>>>> e610f025d06aa9c255563bd80874e3d412c1aba6
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
             raise HTTPException(
                 status_code=401,
                 detail={
@@ -383,8 +423,14 @@ class UsuarioService:
             usuario
         )
 =======
+<<<<<<< HEAD
+        self.repository.actualizar(
+            usuario
+        )
+=======
         self.repository.actualizar(usuario)
 >>>>>>> e610f025d06aa9c255563bd80874e3d412c1aba6
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
 
         now = datetime.utcnow()
 
@@ -418,6 +464,9 @@ class UsuarioService:
             }
         }
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae
 
     def actualizar_rol(
         self,
@@ -499,6 +548,9 @@ class UsuarioService:
                 f"{usuario_logueado['nombre_completo']} "
                 f"(ID: {usuario_logueado['id_usuario']})"
             )
+<<<<<<< HEAD
+        }
+=======
         }
 =======
 =======
@@ -506,3 +558,4 @@ class UsuarioService:
         return self.repo.create(data)
 >>>>>>> 62197992c9e421bb975a958381525013c2d14f56
 >>>>>>> e610f025d06aa9c255563bd80874e3d412c1aba6
+>>>>>>> 76ac4f2b480b2cf48108dd35ad15c738644454ae

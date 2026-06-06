@@ -284,7 +284,7 @@ class ReporteCarteraResponse(BaseModel):
     cartera: List[ItemCartera]
 
 
-# ==================== HU-018 (Creación de reportes de incidencias) ====================
+# ==================== HU-018 (Creación de reportes) ====================
 
 class ReporteBase(BaseModel):
     tipo: str
@@ -302,6 +302,17 @@ class ReporteResponse(ReporteBase):
     nombre_usuario: str
     estado: str
     fecha_reporte: datetime
+    observaciones: Optional[str] = None
+    id_responsable: Optional[int] = None
+    fecha_resolucion: Optional[datetime] = None
 
     class Config:
         from_attributes = True
+
+
+# ==================== HU-019 (Actualización de estado de reportes) ====================
+
+class ActualizarReporteRequest(BaseModel):
+    estado: str
+    observaciones: Optional[str] = None
+    id_responsable: Optional[int] = None

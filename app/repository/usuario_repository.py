@@ -56,22 +56,3 @@ class UsuarioRepository:
             return None
         usuario.id_rol = nuevo_rol
         return usuario
-
-    def update_intentos(self, usuario_id: int, intentos: int, bloqueado_hasta: datetime = None):
-        usuario = self._db.get(usuario_id)
-        if usuario:
-            usuario.intentos_fallidos = intentos
-            if bloqueado_hasta:
-                usuario.bloqueado_hasta = bloqueado_hasta
-
-    def reset_intentos(self, usuario_id: int):
-        usuario = self._db.get(usuario_id)
-        if usuario:
-            usuario.intentos_fallidos = 0
-            usuario.bloqueado_hasta = None
-            usuario.ultimo_login = datetime.now()
-
-    def update_ultimo_login(self, usuario_id: int):
-        usuario = self._db.get(usuario_id)
-        if usuario:
-            usuario.ultimo_login = datetime.now()

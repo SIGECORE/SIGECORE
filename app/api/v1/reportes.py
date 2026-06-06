@@ -4,7 +4,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from datetime import datetime
 import jwt
 
-from domain.models_domain import ReporteCreate, ReporteResponse
+from domain.models_domain import ReporteCreate, ReporteResponse, ActualizarReporteRequest
 from service.reporte_service import ReporteService
 from repository.reporte_repository import ReporteRepository
 
@@ -27,6 +27,17 @@ def validar_token(token: str):
 
 
 router = APIRouter(tags=["Reportes"])
+
+
+@router.get("/reportes", tags=["Reportes"])
+def listar_reportes(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    usuario = validar_token(token)
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Token inválido")
+    
+    reporte_repo = ReporteRepository()
+    return reporte_repo.get_all()
 
 
 @router.post("/reportes", response_model=ReporteResponse, status_code=201)
@@ -55,3 +66,20 @@ def crear_reporte(
     reporte_service = ReporteService(reporte_repo)
     
     return reporte_service.crear_reporte(data, usuario)
+
+
+@router.patch("/reportes/{reporte_id}/estado", response_model=ReporteResponse)
+def actualizar_estado_reporte(
+    reporte_id: int,
+    data: ActualizarReporteRequest,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    token = credentials.credentials
+    usuario = validar_token(token)
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Token inválido")
+    
+    reporte_repo = ReporteRepository()
+    reporte_service = ReporteService(reporte_repo)
+    
+    return reporte_service.actualizar_estado(reporte_id, data, usuario)
