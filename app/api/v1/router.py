@@ -10,7 +10,8 @@ from domain.models_domain import (
     ListaInmueblesResponse,
     AsignarPropietarioRequest,
     PagoRequest,
-    PagoResponse
+    PagoResponse,
+    HistorialPagosResponse
 )
 from service.inmueble_service import InmuebleService
 from service.pago_service import PagoService
@@ -99,14 +100,31 @@ def asignar_propietario(
 @router.post("/pagos", response_model=PagoResponse, status_code=status.HTTP_201_CREATED)
 def registrar_pago(
     data: PagoRequest,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
+    credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
-    if not credentials:
-        raise HTTPException(status_code=401, detail="Token de autenticación requerido")
-    
     token = credentials.credentials
     usuario = validar_token(token)
     if not usuario:
         raise HTTPException(status_code=401, detail="Token inválido")
     
-    # resto del código...
+    pago_repo = PagoRepository()
+    pago_service = PagoService(pago_repo, inmueble_repo)
+    
+    return pago_service.registrar_pago(data, usuario)
+
+
+# ==================== HU-016 (Historial de pagos por usuario) ====================
+@router.get("/pagos/usuario/{usuario_id}", response_model=HistorialPagosResponse)
+def obtener_historial_pagos(
+    usuario_id: int,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    token = credentials.credentials
+    usuario = validar_token(token)
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Token inválido")
+    
+    pago_repo = PagoRepository()
+    pago_service = PagoService(pago_repo, inmueble_repo)
+    
+    return pago_service.obtener_historial_pagos(usuario_id, usuario)

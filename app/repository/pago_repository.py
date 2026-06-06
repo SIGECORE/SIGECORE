@@ -1,5 +1,5 @@
 # app/repository/pago_repository.py
-from typing import Dict
+from typing import Dict, List
 from domain.models_domain import PagoResponse, EstadoPago
 from datetime import datetime
 
@@ -26,3 +26,11 @@ class PagoRepository:
         self._db[self._next_id] = pago
         self._next_id += 1
         return pago
+
+    def get_pagos_by_usuario(self, usuario_id: int) -> List[PagoResponse]:
+        pagos = []
+        for pago in self._db.values():
+            if pago.id_usuario == usuario_id:
+                pagos.append(pago)
+        pagos.sort(key=lambda x: x.fecha_pago, reverse=True)
+        return pagos

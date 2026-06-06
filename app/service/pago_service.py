@@ -1,7 +1,10 @@
 # app/service/pago_service.py
 import random
 from fastapi import HTTPException, status
-from domain.models_domain import PagoRequest, PagoResponse
+from domain.models_domain import (
+    PagoRequest, PagoResponse, HistorialPagosResponse,
+    UsuarioInfo, PagoHistorialResponse, InmuebleInfo
+)
 from repository.pago_repository import PagoRepository
 from repository.inmueble_repository import InmuebleRepository
 
@@ -63,4 +66,50 @@ class PagoService:
             monto=data.monto,
             metodo_pago=data.metodo_pago,
             comprobante_url=comprobante_url
+        )
+
+    def obtener_historial_pagos(self, usuario_id: int, usuario_autenticado: dict) -> HistorialPagosResponse:
+        
+        id_usuario_auth = usuario_autenticado.get('id_usuario')
+        id_rol_auth = usuario_autenticado.get('id_rol')
+        
+        if id_usuario_auth != usuario_id and id_rol_auth != 1:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tiene permisos para consultar los pagos de otro usuario"
+            )
+        
+        pagos = self.pago_repo.get_pagos_by_usuario(usuario_id)
+        
+        # Obtener información del inmueble para cada pago
+        pagos_con_inmueble = []
+        for pago in pagos:
+            inmueble = self.inmueble_repo.get_by_id(pago.id_inmueble)
+            inmueble_info = InmuebleInfo(
+                id_inmueble=inmueble.id_inmueble,
+                numero=inmueble.numero,
+                torre=inmueble.torre
+            )
+            pagos_con_inmueble.append(
+                PagoHistorialResponse(
+                    id_pago=pago.id_pago,
+                    inmueble=inmueble_info,
+                    monto=pago.monto,
+                    metodo_pago=pago.metodo_pago,
+                    estado=pago.estado,
+                    fecha_pago=pago.fecha_pago,
+                    comprobante_url=pago.comprobante_url
+                )
+            )
+        
+        # TODO: Obtener datos reales del usuario desde un repositorio de usuarios
+        usuario_info = UsuarioInfo(
+            id_usuario=usuario_id,
+            nombre_completo=f"Usuario {usuario_id}",
+            email=f"usuario{usuario_id}@example.com"
+        )
+        
+        return HistorialPagosResponse(
+            usuario=usuario_info,
+            pagos=pagos_con_inmueble
         )
