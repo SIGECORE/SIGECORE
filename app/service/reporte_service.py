@@ -1,48 +1,36 @@
+# app/service/reporte_service.py
 from datetime import datetime
-
-from fastapi import HTTPException
+from fastapi import HTTPException, status
+from domain.models_domain import ReporteCreate, ReporteResponse
+from repository.reporte_repository import ReporteRepository
 
 
 class ReporteService:
 
-    def __init__(
-        self,
-        repository
-    ):
-        self.repository = repository
+    def __init__(self, repo: ReporteRepository):
+        self.repo = repo
 
-    def crear_reporte(
-        self,
-        data,
-        usuario
-    ):
-
-        tipos_validos = [
-            "daño",
-            "queja",
-            "solicitud"
-        ]
-
-        if data.tipo not in tipos_validos:
-
+    def crear_reporte(self, data: ReporteCreate, usuario_autenticado: dict) -> ReporteResponse:
+        
+        # Validar campos obligatorios
+        if not data.tipo:
             raise HTTPException(
-                status_code=400,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
                     "success": False,
                     "statusCode": 400,
                     "message": "Error en la solicitud",
                     "error": {
-                        "error_code": "TIPO_INVALIDO",
-                        "details": "El tipo debe ser: daño, queja o solicitud",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "error_code": "CAMPO_REQUERIDO",
+                        "details": "El campo tipo es obligatorio",
+                        "timestamp": datetime.now().isoformat()
                     }
                 }
             )
-
-        if not data.descripcion.strip():
-
+        
+        if not data.descripcion:
             raise HTTPException(
-                status_code=400,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
                     "success": False,
                     "statusCode": 400,
@@ -50,43 +38,29 @@ class ReporteService:
                     "error": {
                         "error_code": "CAMPO_REQUERIDO",
                         "details": "El campo descripcion es obligatorio",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now().isoformat()
                     }
                 }
             )
-
-        reporte = {
-            "id_usuario": usuario["id_usuario"],
-            "nombre_usuario": usuario["nombre_completo"],
-            "tipo": data.tipo,
-            "descripcion": data.descripcion,
-            "evidencias": data.evidencias,
-            "estado": "pendiente",
-            "fecha_reporte": datetime.utcnow()
-        }
-
-        return self.repository.create(
-            reporte
-        )
-
-    def listar_reportes(self):
-
-        return self.repository.listar()
-
-    def obtener_reporte(
-        self,
-        id_reporte: int
-    ):
-
-        return self.repository.obtener_por_id(
-            id_reporte
-        )
-
-    def listar_por_usuario(
-        self,
-        id_usuario: int
-    ):
-
-        return self.repository.obtener_por_usuario(
-            id_usuario
-        )
+        
+        # Validar tipo
+        tipos_validos = ["daño", "queja", "solicitud"]
+        if data.tipo not in tipos_validos:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "success": False,
+                    "statusCode": 400,
+                    "message": "Error en la solicitud",
+                    "error": {
+                        "error_code": "TIPO_INVALIDO",
+                        "details": "El tipo debe ser: daño, queja o solicitud",
+                        "timestamp": datetime.now().isoformat()
+                    }
+                }
+            )
+        
+        id_usuario = usuario_autenticado.get('id_usuario')
+        nombre_usuario = usuario_autenticado.get('nombre_completo', f"Usuario {id_usuario}")
+        
+        return self.repo.create(data, id_usuario, nombre_usuario)

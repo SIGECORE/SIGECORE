@@ -1,77 +1,47 @@
+# app/repository/comunicado_repository.py
+from typing import Dict, List, Optional
+from domain.models_domain import ComunicadoResponse, ComunicadoCreate
 from datetime import datetime
 
 
 class ComunicadoRepository:
 
     def __init__(self):
+        self._db: Dict[int, ComunicadoResponse] = {}
+        self._next_id: int = 1
 
-        self._comunicados = {}
-
-        self._next_id = 1
-
-    def create(
-        self,
-        comunicado: dict
-    ):
-
-        comunicado["id_comunicado"] = self._next_id
-
-        self._comunicados[
-            self._next_id
-        ] = comunicado
-
+    def create(self, data: ComunicadoCreate, id_autor: int, autor_nombre: str) -> ComunicadoResponse:
+        comunicado = ComunicadoResponse(
+            id_comunicado=self._next_id,
+            titulo=data.titulo,
+            contenido=data.contenido,
+            archivos_adjuntos=data.archivos_adjuntos,
+            fecha_expiracion=data.fecha_expiracion,
+            id_autor=id_autor,
+            autor_nombre=autor_nombre,
+            fecha_publicacion=datetime.now(),
+            activo=True
+        )
+        self._db[self._next_id] = comunicado
         self._next_id += 1
-
         return comunicado
 
-    def obtener_por_id(
-        self,
-        id_comunicado: int
-    ):
+    def get_activos(self) -> List[ComunicadoResponse]:
+        ahora = datetime.now()
+        activos = []
+        for comunicado in self._db.values():
+            if comunicado.activo:
+                if comunicado.fecha_expiracion is None or comunicado.fecha_expiracion > ahora:
+                    activos.append(comunicado)
+        activos.sort(key=lambda x: x.fecha_publicacion, reverse=True)
+        return activos
 
-        return self._comunicados.get(
-            id_comunicado
-        )
+    def get_by_id(self, comunicado_id: int) -> Optional[ComunicadoResponse]:
+        return self._db.get(comunicado_id)
 
-    def listar(self):
-
-        return list(
-            self._comunicados.values()
-        )
-
-    def listar_activos(self):
-
-        ahora = datetime.utcnow()
-
-        comunicados_activos = []
-
-        for comunicado in self._comunicados.values():
-
-            # Debe estar activo
-            if not comunicado["activo"]:
-                continue
-
-            fecha_expiracion = comunicado.get(
-                "fecha_expiracion"
-            )
-
-            # Si tiene fecha de expiración y ya expiró
-            if (
-                fecha_expiracion is not None
-                and fecha_expiracion.replace(
-                    tzinfo=None
-                ) <= ahora
-            ):
-                continue
-
-            comunicados_activos.append(
-                comunicado
-            )
-
-        # Ordenar por fecha_publicacion DESC
-        comunicados_activos.sort(
-            key=lambda x: x["fecha_publicacion"],
-            reverse=True
-        )
-
-        return comunicados_activos
+    def desactivar(self, comunicado_id: int) -> bool:
+        comunicado = self._db.get(comunicado_id)
+        if comunicado:
+            comunicado.activo = False
+            return True
+        return False
