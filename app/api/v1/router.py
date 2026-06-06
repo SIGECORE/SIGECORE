@@ -11,10 +11,12 @@ from domain.models_domain import (
     AsignarPropietarioRequest,
     PagoRequest,
     PagoResponse,
-    HistorialPagosResponse
+    HistorialPagosResponse,
+    ReporteCarteraResponse
 )
 from service.inmueble_service import InmuebleService
 from service.pago_service import PagoService
+from service.reporte_service import ReporteService
 from repository.inmueble_repository import InmuebleRepository
 from repository.pago_repository import PagoRepository
 
@@ -36,50 +38,44 @@ def validar_token(token: str):
         return None
 
 
-# Repositorios y servicios (compartidos)
 inmueble_repo = InmuebleRepository()
+pago_repo = PagoRepository()
 inmueble_service = InmuebleService(inmueble_repo)
 
 router = APIRouter()
 
 
-# ==================== HU-004 (Registro de inmuebles) ====================
-@router.post("/inmuebles", response_model=InmuebleResponse, status_code=status.HTTP_201_CREATED)
+# ==================== INMUEBLES ====================
+@router.post("/inmuebles", response_model=InmuebleResponse, status_code=status.HTTP_201_CREATED, tags=["Inmuebles"])
 def create_inmueble(data: InmuebleCreate, credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     usuario = validar_token(token)
     if not usuario:
         raise HTTPException(status_code=401, detail="Token inválido")
-    
     if usuario.get('id_rol') != 1:
-        raise HTTPException(status_code=403, detail="Acceso denegado. Se requiere rol de administrador")
-    
+        raise HTTPException(status_code=403, detail="Acceso denegado")
     return inmueble_service.create_inmueble(data, usuario)
 
 
-# ==================== HU-006 (Consulta de inmuebles) ====================
-@router.get("/inmuebles", response_model=ListaInmueblesResponse)
+@router.get("/inmuebles", response_model=ListaInmueblesResponse, tags=["Inmuebles"])
 def listar_inmuebles(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    torre: str = Query(None, description="Filtrar por torre"),
-    estado: str = Query(None, description="Filtrar por estado"),
-    nombre_propietario: str = Query(None, description="Filtrar por nombre del propietario"),
-    page: int = Query(1, ge=1, description="Número de página"),
-    limit: int = Query(10, ge=1, le=100, description="Elementos por página")
+    torre: str = Query(None),
+    estado: str = Query(None),
+    nombre_propietario: str = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100)
 ):
     token = credentials.credentials
     usuario = validar_token(token)
     if not usuario:
         raise HTTPException(status_code=401, detail="Token inválido")
-    
     if usuario.get('id_rol') != 1:
-        raise HTTPException(status_code=403, detail="Acceso denegado. Se requiere rol de administrador")
-    
+        raise HTTPException(status_code=403, detail="Acceso denegado")
     return inmueble_service.listar_inmuebles(torre, estado, nombre_propietario, page, limit)
 
 
-# ==================== HU-005 (Asignación de propietario) ====================
-@router.patch("/inmuebles/{inmueble_id}/propietario", response_model=InmuebleResponse)
+@router.patch("/inmuebles/{inmueble_id}/propietario", response_model=InmuebleResponse, tags=["Inmuebles"])
 def asignar_propietario(
     inmueble_id: int,
     data: AsignarPropietarioRequest,
@@ -89,42 +85,41 @@ def asignar_propietario(
     usuario = validar_token(token)
     if not usuario:
         raise HTTPException(status_code=401, detail="Token inválido")
-    
     if usuario.get('id_rol') != 1:
-        raise HTTPException(status_code=403, detail="Acceso denegado. Se requiere rol de administrador")
-    
+        raise HTTPException(status_code=403, detail="Acceso denegado")
     return inmueble_service.asignar_propietario(inmueble_id, data.id_propietario, usuario)
 
 
-# ==================== HU-015 (Registro de pago) ====================
-@router.post("/pagos", response_model=PagoResponse, status_code=status.HTTP_201_CREATED)
-def registrar_pago(
-    data: PagoRequest,
-    credentials: HTTPAuthorizationCredentials = Depends(security)
-):
+# ==================== PAGOS ====================
+@router.post("/pagos", response_model=PagoResponse, status_code=status.HTTP_201_CREATED, tags=["Pagos"])
+def registrar_pago(data: PagoRequest, credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     usuario = validar_token(token)
     if not usuario:
         raise HTTPException(status_code=401, detail="Token inválido")
-    
-    pago_repo = PagoRepository()
     pago_service = PagoService(pago_repo, inmueble_repo)
-    
     return pago_service.registrar_pago(data, usuario)
 
 
-# ==================== HU-016 (Historial de pagos por usuario) ====================
-@router.get("/pagos/usuario/{usuario_id}", response_model=HistorialPagosResponse)
-def obtener_historial_pagos(
-    usuario_id: int,
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+@router.get("/pagos/usuario/{usuario_id}", response_model=HistorialPagosResponse, tags=["Pagos"])
+def obtener_historial_pagos(usuario_id: int, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    usuario = validar_token(token)
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Token inválido")
+    pago_service = PagoService(pago_repo, inmueble_repo)
+    return pago_service.obtener_historial_pagos(usuario_id, usuario)
+
+
+@router.get("/pagos/reporte-cartera", response_model=ReporteCarteraResponse, tags=["Pagos"])
+def reporte_cartera(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    torre: str = Query(None),
+    meses_mora: int = Query(None)
 ):
     token = credentials.credentials
     usuario = validar_token(token)
     if not usuario:
         raise HTTPException(status_code=401, detail="Token inválido")
-    
-    pago_repo = PagoRepository()
-    pago_service = PagoService(pago_repo, inmueble_repo)
-    
-    return pago_service.obtener_historial_pagos(usuario_id, usuario)
+    reporte_service = ReporteService(inmueble_repo, pago_repo)
+    return reporte_service.generar_reporte_cartera(usuario, torre, meses_mora)

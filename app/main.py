@@ -12,7 +12,7 @@ app = FastAPI(
 
 security = HTTPBearer()
 
-app.include_router(router)
+app.include_router(router, prefix="/api/v1")
 
 @app.get("/")
 def root():
