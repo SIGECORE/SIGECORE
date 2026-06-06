@@ -1,15 +1,6 @@
-# main.py
+# app/main.py
 from fastapi import FastAPI
 from api.v1.router import router
 
-app = FastAPI(
-    title="SIGECORE API",
-    description="API REST para la consulta de comunicados de SIGECORE",
-    version="1.0.0"
-)
-
-app.include_router(router)
-
-@app.get("/")
-def root():
-    return {"message": "¡API de SIGECORE funcionando! 🚀"}
+app = FastAPI()
+app.include_router(router, prefix="/api/v1")
