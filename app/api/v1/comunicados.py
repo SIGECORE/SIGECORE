@@ -30,6 +30,7 @@ def validar_token(token: str):
 router = APIRouter(tags=["Comunicados"])
 
 
+# ==================== HU-013 (Publicación de comunicados) ====================
 @router.post("/comunicados", response_model=ComunicadoResponse, status_code=201)
 def publicar_comunicado(
     data: ComunicadoCreate,
@@ -40,7 +41,6 @@ def publicar_comunicado(
     if not usuario:
         raise HTTPException(status_code=401, detail="Token inválido")
     
-    # Solo administradores pueden publicar comunicados
     if usuario.get('id_rol') != 1:
         raise HTTPException(
             status_code=403,
@@ -62,16 +62,61 @@ def publicar_comunicado(
     return comunicado_service.publicar_comunicado(data, usuario)
 
 
-@router.get("/comunicados", response_model=list[ComunicadoResponse])
+# ==================== HU-014 (Consulta de comunicados activos) ====================
+@router.get("/comunicados/activos", tags=["Comunicados"])
 def listar_comunicados_activos(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     token = credentials.credentials
     usuario = validar_token(token)
     if not usuario:
-        raise HTTPException(status_code=401, detail="Token inválido")
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "success": False,
+                "statusCode": 401,
+                "message": "No autenticado",
+                "error": {
+                    "error_code": "NO_AUTENTICADO",
+                    "details": "Se requiere un token de autenticación válido",
+                    "timestamp": datetime.now().isoformat()
+                }
+            }
+        )
     
     comunicado_repo = ComunicadoRepository()
     comunicado_service = ComunicadoService(comunicado_repo)
     
-    return comunicado_service.listar_comunicados_activos()
+    comunicados = comunicado_service.listar_comunicados_activos()
+    
+    if not comunicados:
+        return {
+            "success": True,
+            "statusCode": 200,
+            "message": "No hay comunicados activos en este momento",
+            "data": {
+                "comunicados": []
+            }
+        }
+    
+    return {
+        "success": True,
+        "statusCode": 200,
+        "message": "Consulta exitosa",
+        "data": {
+            "comunicados": [
+                {
+                    "id_comunicado": c.id_comunicado,
+                    "titulo": c.titulo,
+                    "contenido": c.contenido,
+                    "autor": {
+                        "id_autor": c.id_autor,
+                        "nombre": c.autor_nombre
+                    },
+                    "archivos_adjuntos": c.archivos_adjuntos,
+                    "fecha_publicacion": c.fecha_publicacion.isoformat()
+                }
+                for c in comunicados
+            ]
+        }
+    }

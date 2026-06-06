@@ -3,6 +3,22 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 
+from enum import Enum
+
+class EstadoInmueble(str, Enum):
+    DISPONIBLE = "disponible"
+    OCUPADO = "ocupado"
+    MANTENIMIENTO = "mantenimiento"
+
+class EstadoPago(str, Enum):
+    CONFIRMADO = "confirmado"
+    RECHAZADO = "rechazado"
+    PENDIENTE = "pendiente"
+
+
+class EstadoZona(str, Enum):
+    DISPONIBLE = "disponible"
+    MANTENIMIENTO = "mantenimiento"
 
 # ==================== HU-001 (Usuario base) ====================
 
@@ -150,7 +166,7 @@ class DisponibilidadResponse(BaseModel):
     data: DisponibilidadData
 
 
-# ==================== HU-013 (Publicación de comunicados) ====================
+# ==================== HU-013 / HU-014 (Comunicados) ====================
 
 class ComunicadoBase(BaseModel):
     titulo: str

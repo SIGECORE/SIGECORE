@@ -12,7 +12,6 @@ class ComunicadoService:
 
     def publicar_comunicado(self, data: ComunicadoCreate, usuario_autenticado: dict) -> ComunicadoResponse:
         
-        # Validar campos obligatorios
         if not data.titulo or not data.contenido:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -28,7 +27,6 @@ class ComunicadoService:
                 }
             )
         
-        # Validar fecha de expiración (si se envía)
         if data.fecha_expiracion and data.fecha_expiracion < datetime.now():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
