@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from datetime import datetime
 
 from fastapi import (
@@ -226,3 +227,11 @@ def actualizar_rol(
             "data": resultado
         }
     )
+=======
+# app/api/v1/router.py
+from fastapi import APIRouter
+from api.v1.usuarios import router as usuarios_router
+
+router = APIRouter()
+router.include_router(usuarios_router)
+>>>>>>> e610f025d06aa9c255563bd80874e3d412c1aba6
