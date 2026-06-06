@@ -2,13 +2,16 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
-
 from enum import Enum
+
+
+# ==================== ENUMS ====================
 
 class EstadoInmueble(str, Enum):
     DISPONIBLE = "disponible"
     OCUPADO = "ocupado"
     MANTENIMIENTO = "mantenimiento"
+
 
 class EstadoPago(str, Enum):
     CONFIRMADO = "confirmado"
@@ -19,6 +22,7 @@ class EstadoPago(str, Enum):
 class EstadoZona(str, Enum):
     DISPONIBLE = "disponible"
     MANTENIMIENTO = "mantenimiento"
+
 
 # ==================== HU-001 (Usuario base) ====================
 
@@ -79,9 +83,12 @@ class InmuebleCreate(InmuebleBase):
 
 class InmuebleResponse(InmuebleBase):
     id_inmueble: int
-    estado: str
+    estado: EstadoInmueble
     fecha_registro: datetime
     id_propietario: Optional[int] = None
+
+    class Config:
+        from_attributes = True
 
 
 # ==================== HU-005 (Asignación de propietario) ====================
@@ -131,8 +138,11 @@ class ZonaCreate(ZonaBase):
 
 class ZonaResponse(ZonaBase):
     id_zona: int
-    estado: str
+    estado: EstadoZona
     fecha_registro: datetime
+
+    class Config:
+        from_attributes = True
 
 
 # ==================== HU-008 (Consulta disponibilidad zonas) ====================
@@ -205,9 +215,12 @@ class PagoResponse(BaseModel):
     id_inmueble: int
     monto: float
     metodo_pago: str
-    estado: str
+    estado: EstadoPago
     fecha_pago: datetime
     comprobante_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 
 # ==================== HU-016 (Historial de pagos) ====================
@@ -229,7 +242,7 @@ class PagoHistorialResponse(BaseModel):
     inmueble: InmuebleInfo
     monto: float
     metodo_pago: str
-    estado: str
+    estado: EstadoPago
     fecha_pago: datetime
     comprobante_url: Optional[str] = None
 
@@ -269,3 +282,26 @@ class ReporteCarteraResponse(BaseModel):
     total_morosos: int
     total_adeudado: float
     cartera: List[ItemCartera]
+
+
+# ==================== HU-018 (Creación de reportes de incidencias) ====================
+
+class ReporteBase(BaseModel):
+    tipo: str
+    descripcion: str
+    evidencias: Optional[List[str]] = None
+
+
+class ReporteCreate(ReporteBase):
+    pass
+
+
+class ReporteResponse(ReporteBase):
+    id_reporte: int
+    id_usuario: int
+    nombre_usuario: str
+    estado: str
+    fecha_reporte: datetime
+
+    class Config:
+        from_attributes = True
