@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from datetime import (
     datetime,
     timedelta
@@ -12,10 +13,26 @@ from fastapi import HTTPException
 SECRET_KEY = "mi_clave_secreta"
 
 ALGORITHM = "HS256"
+=======
+# service/usuario_service.py
+from fastapi import HTTPException, status
+from datetime import datetime
+
+from app.domain.models_domain import Usuario, UsuarioCreate
+from app.repository.usuario_repository import UsuarioRepository
+
+
+# Constantes de errores
+EMAIL_DUPLICADO = "EMAIL_DUPLICADO"
+INVALID_DATA = "INVALID_DATA"
+ROL_INVALIDO = "ROL_INVALIDO"
+ACCESO_DENEGADO = "ACCESO_DENEGADO"
+>>>>>>> 62197992c9e421bb975a958381525013c2d14f56
 
 
 class UsuarioService:
 
+<<<<<<< HEAD
     def __init__(self, repository):
 
         self.repository = repository
@@ -30,36 +47,71 @@ class UsuarioService:
 
             raise HTTPException(
                 status_code=403,
+=======
+    def __init__(self, repo: UsuarioRepository):
+        self.repo = repo
+
+    def create_usuario(
+        self,
+        data: UsuarioCreate,
+        usuario_autenticado: dict
+    ) -> Usuario:
+
+        # Validar rol administrador
+        if usuario_autenticado.get("id_rol") != 1:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+>>>>>>> 62197992c9e421bb975a958381525013c2d14f56
                 detail={
                     "success": False,
                     "statusCode": 403,
                     "message": "Acceso denegado",
                     "error": {
+<<<<<<< HEAD
                         "error_code": "ACCESO_DENEGADO",
+=======
+                        "error_code": ACCESO_DENEGADO,
+>>>>>>> 62197992c9e421bb975a958381525013c2d14f56
                         "details": "Se requiere rol de administrador",
                         "timestamp": datetime.utcnow().isoformat()
                     }
                 }
             )
 
+<<<<<<< HEAD
         email = data.email.lower().strip()
 
         if self.repository.existe_por_email(email):
 
             raise HTTPException(
                 status_code=400,
+=======
+        # Normalizar email
+        email_normalizado = data.email.lower()
+
+        # Validar email duplicado
+        if self.repo.existe_por_email(email_normalizado):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+>>>>>>> 62197992c9e421bb975a958381525013c2d14f56
                 detail={
                     "success": False,
                     "statusCode": 400,
                     "message": "Error en la solicitud",
                     "error": {
+<<<<<<< HEAD
                         "error_code": "EMAIL_DUPLICADO",
                         "details": f"El email {email} ya está registrado",
+=======
+                        "error_code": EMAIL_DUPLICADO,
+                        "details": f"El email {email_normalizado} ya está registrado",
+>>>>>>> 62197992c9e421bb975a958381525013c2d14f56
                         "timestamp": datetime.utcnow().isoformat()
                     }
                 }
             )
 
+<<<<<<< HEAD
         password_hash = bcrypt.hashpw(
             data.password.encode("utf-8"),
             bcrypt.gensalt(rounds=10)
@@ -110,11 +162,25 @@ class UsuarioService:
                     "error": {
                         "error_code": "CREDENCIALES_INVALIDAS",
                         "details": "El correo o la contraseña son incorrectos",
+=======
+        # Validar longitud de contraseña
+        if len(data.password) < 6:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "success": False,
+                    "statusCode": 400,
+                    "message": "Error en la solicitud",
+                    "error": {
+                        "error_code": INVALID_DATA,
+                        "details": "La contraseña debe tener mínimo 6 caracteres",
+>>>>>>> 62197992c9e421bb975a958381525013c2d14f56
                         "timestamp": datetime.utcnow().isoformat()
                     }
                 }
             )
 
+<<<<<<< HEAD
         if not usuario["activo"]:
 
             raise HTTPException(
@@ -126,11 +192,25 @@ class UsuarioService:
                     "error": {
                         "error_code": "USUARIO_INACTIVO",
                         "details": "La cuenta está desactivada",
+=======
+        # Validar rol permitido
+        if data.id_rol not in [1, 2]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "success": False,
+                    "statusCode": 400,
+                    "message": "Error en la solicitud",
+                    "error": {
+                        "error_code": ROL_INVALIDO,
+                        "details": "El rol debe ser 1 (administrador) o 2 (residente)",
+>>>>>>> 62197992c9e421bb975a958381525013c2d14f56
                         "timestamp": datetime.utcnow().isoformat()
                     }
                 }
             )
 
+<<<<<<< HEAD
         if (
             usuario["bloqueado_hasta"]
             and usuario["bloqueado_hasta"] > datetime.utcnow()
@@ -219,3 +299,7 @@ class UsuarioService:
                 )
             }
         }
+=======
+        # Crear usuario
+        return self.repo.create(data)
+>>>>>>> 62197992c9e421bb975a958381525013c2d14f56
