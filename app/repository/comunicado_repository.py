@@ -33,7 +33,6 @@ class ComunicadoRepository:
             if comunicado.activo:
                 if comunicado.fecha_expiracion is None or comunicado.fecha_expiracion > ahora:
                     activos.append(comunicado)
-        # Ordenar por fecha de publicación descendente
         activos.sort(key=lambda x: x.fecha_publicacion, reverse=True)
         return activos
 
