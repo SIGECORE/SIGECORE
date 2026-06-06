@@ -17,6 +17,12 @@ class EstadoPago(str, Enum):
     PENDIENTE = "pendiente"
 
 
+class EstadoZona(str, Enum):
+    DISPONIBLE = "disponible"
+    MANTENIMIENTO = "mantenimiento"
+
+
+# ==================== INMUEBLES ====================
 class InmuebleBase(BaseModel):
     numero: str
     torre: str
@@ -64,6 +70,7 @@ class ListaInmueblesResponse(BaseModel):
     paginacion: PaginacionInfo
 
 
+# ==================== PAGOS ====================
 class PagoRequest(BaseModel):
     id_inmueble: int
     monto: float
@@ -112,8 +119,6 @@ class HistorialPagosResponse(BaseModel):
     pagos: List[PagoHistorialResponse]
 
 
-# ==================== HU-017 (Reporte de cartera) ====================
-
 class InmuebleCartera(BaseModel):
     id_inmueble: int
     numero: str
@@ -142,3 +147,132 @@ class ReporteCarteraResponse(BaseModel):
     total_morosos: int
     total_adeudado: float
     cartera: List[ItemCartera]
+
+
+# ==================== ZONAS COMUNES ====================
+class ZonaBase(BaseModel):
+    nombre: str
+    capacidad_maxima: int
+    descripcion: Optional[str] = None
+    horario_inicio: Optional[str] = None
+    horario_fin: Optional[str] = None
+
+
+class ZonaCreate(ZonaBase):
+    pass
+
+
+class ZonaResponse(ZonaBase):
+    id_zona: int
+    estado: EstadoZona
+    fecha_registro: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ZonaInfo(BaseModel):
+    zona_id: int
+    nombre: str
+
+
+class ConflictoInfo(BaseModel):
+    id_reserva: int
+    usuario: str
+    hora_inicio: str
+    hora_fin: str
+
+
+class DisponibilidadData(BaseModel):
+    zona_id: int
+    nombre: str
+    fecha: str
+    hora_inicio: str
+    hora_fin: str
+    disponible: bool
+    conflicto_con: Optional[ConflictoInfo] = None
+
+
+class DisponibilidadResponse(BaseModel):
+    success: bool
+    statusCode: int
+    message: str
+    data: DisponibilidadData
+
+
+# ==================== USUARIOS (HU-001 y HU-002) ====================
+class UsuarioCreate(BaseModel):
+    nombre_completo: str
+    email: str
+    telefono: str
+    password: str
+    id_rol: int
+
+
+class UsuarioResponse(BaseModel):
+    id_usuario: int
+    nombre_completo: str
+    email: str
+    telefono: str
+    id_rol: int
+    activo: int
+    fecha_registro: datetime
+    intentos_fallidos: Optional[int] = 0
+    bloqueado_hasta: Optional[datetime] = None
+    ultimo_login: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class UsuarioLoginResponse(BaseModel):
+    id_usuario: int
+    nombre_completo: str
+    email: str
+    id_rol: int
+    rol_nombre: str
+
+
+class LoginResponse(BaseModel):
+    success: bool
+    statusCode: int
+    message: str
+    data: dict
+
+
+# app/domain/models_domain.py
+from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime
+
+
+# ==================== HU-002 (Inicio de sesión) ====================
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class LoginResponse(BaseModel):
+    success: bool
+    statusCode: int
+    message: str
+    data: dict
+
+
+class UsuarioResponse(BaseModel):
+    id_usuario: int
+    nombre_completo: str
+    email: str
+    telefono: str
+    id_rol: int
+    activo: int
+    fecha_registro: datetime
+    intentos_fallidos: Optional[int] = 0
+    bloqueado_hasta: Optional[datetime] = None
+    ultimo_login: Optional[datetime] = None
