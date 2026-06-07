@@ -1,3 +1,16 @@
+<<<<<<< HEAD
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.exe
+venv/ 
+Documentacion/ 
+_pycache_/ 
+=======
 __pycache__/ 
 *.pyc 
 <<<<<<< HEAD
@@ -8,11 +21,14 @@ venv/
 venv/ 
 Documentacion/ 
 __pycache__/ 
+>>>>>>> 62197992c9e421bb975a958381525013c2d14f56
 *.pyc 
 *.db 
 .env.example 
 Comandos Github 
 app_backup/ 
+<<<<<<< HEAD
+=======
 <<<<<<< HEAD
 venv/ 
 Documentacion/ 
@@ -25,3 +41,4 @@ app_backup/
 =======
 >>>>>>> hu-004-Registro-de-Inmuebles
 >>>>>>> d3ef36a8e6d7c03bab413c6b442799cd76d7ae59
+>>>>>>> 62197992c9e421bb975a958381525013c2d14f56
