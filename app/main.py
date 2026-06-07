@@ -1,6 +1,5 @@
 # app/main.py
 from fastapi import FastAPI
-from fastapi.security import HTTPBearer
 from api.v1.router import router
 
 app = FastAPI(
@@ -8,8 +7,6 @@ app = FastAPI(
     description="API REST para gestión de conjuntos residenciales",
     version="1.0.0"
 )
-
-security = HTTPBearer()
 
 app.include_router(router, prefix="/api/v1")
 
