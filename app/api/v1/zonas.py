@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
 from domain.models_domain import ZonaCreate, ZonaResponse
-from repositories import zona_repo  # ← Importar desde el archivo global
+from repositories import zona_repo
 
 router = APIRouter(tags=["Zonas Comunes"])
 

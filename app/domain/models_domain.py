@@ -176,6 +176,39 @@ class DisponibilidadResponse(BaseModel):
     data: DisponibilidadData
 
 
+# ==================== HU-009 / HU-010 (Reservas) ====================
+
+class ReservaCreate(BaseModel):
+    id_zona: int
+    fecha: str
+    hora_inicio: str
+    hora_fin: str
+    observaciones: Optional[str] = None
+
+
+class ReservaResponse(BaseModel):
+    id_reserva: int
+    id_usuario: int
+    nombre_usuario: str
+    id_zona: int
+    nombre_zona: str
+    fecha: str
+    hora_inicio: str
+    hora_fin: str
+    estado: str
+    fecha_solicitud: datetime
+    observaciones: Optional[str] = None
+    fecha_aprobacion: Optional[datetime] = None
+    aprobado_por: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+
+class AprobarReservaRequest(BaseModel):
+    estado: str
+
+
 # ==================== HU-013 / HU-014 (Comunicados) ====================
 
 class ComunicadoBase(BaseModel):
@@ -316,28 +349,3 @@ class ActualizarReporteRequest(BaseModel):
     estado: str
     observaciones: Optional[str] = None
     id_responsable: Optional[int] = None
-
- # ==================== HU-009 (Solicitud de reserva) ====================
-
-class ReservaCreate(BaseModel):
-    id_zona: int
-    fecha: str
-    hora_inicio: str
-    hora_fin: str
-    observaciones: Optional[str] = None
-
-
-class ReservaResponse(BaseModel):
-    id_reserva: int
-    id_usuario: int
-    nombre_usuario: str
-    id_zona: int
-    nombre_zona: str
-    fecha: str
-    hora_inicio: str
-    hora_fin: str
-    estado: str
-    fecha_solicitud: datetime
-
-    class Config:
-        from_attributes = True   

@@ -6,7 +6,7 @@ import jwt
 
 from domain.models_domain import ReservaCreate, ReservaResponse
 from service.reserva_service import ReservaService
-from repositories import reserva_repo, zona_repo, usuario_repo  # ← Importar desde el archivo global
+from repositories import reserva_repo, zona_repo, usuario_repo
 
 
 SECRET_KEY = "mi_clave_secreta"

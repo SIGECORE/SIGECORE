@@ -10,6 +10,7 @@ class ReservaRepository:
         self._db: Dict[int, ReservaResponse] = {}
         self._next_id: int = 1
 
+    # ==================== HU-009 (Crear reserva) ====================
     def create(self, data: ReservaCreate, id_usuario: int, nombre_usuario: str, nombre_zona: str) -> ReservaResponse:
         reserva = ReservaResponse(
             id_reserva=self._next_id,
@@ -37,3 +38,25 @@ class ReservaRepository:
                     if (hora_inicio < reserva.hora_fin and hora_fin > reserva.hora_inicio):
                         return True
         return False
+
+    def get_pendientes(self) -> List[ReservaResponse]:
+        pendientes = []
+        for reserva in self._db.values():
+            if reserva.estado == "pendiente":
+                pendientes.append(reserva)
+        return pendientes
+
+    # ==================== HU-010 (Aprobar/Rechazar reserva) ====================
+    def aprobar_rechazar(self, reserva_id: int, estado: str, id_administrador: int) -> Optional[ReservaResponse]:
+        reserva = self._db.get(reserva_id)
+        if not reserva:
+            return None
+        
+        if reserva.estado != "pendiente":
+            return None
+        
+        reserva.estado = estado
+        reserva.fecha_aprobacion = datetime.now()
+        reserva.aprobado_por = id_administrador
+        
+        return reserva
