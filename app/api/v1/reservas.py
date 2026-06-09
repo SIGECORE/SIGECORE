@@ -69,3 +69,18 @@ def cancelar_reserva(
     reserva_service = ReservaService(reserva_repo, zona_repo, usuario_repo)
     
     return reserva_service.cancelar_reserva(reserva_id, usuario)
+
+
+@router.get("/reservas/usuario/{usuario_id}")
+def obtener_reservas_usuario(
+    usuario_id: int,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    token = credentials.credentials
+    usuario = validar_token(token)
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Token inválido")
+    
+    reserva_service = ReservaService(reserva_repo, zona_repo, usuario_repo)
+    
+    return reserva_service.obtener_reservas_usuario(usuario_id, usuario)
