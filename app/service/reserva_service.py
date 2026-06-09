@@ -265,3 +265,79 @@ class ReservaService:
                 "fecha_cancelacion": reserva_actualizada.fecha_cancelacion.isoformat()
             }
         }
+
+    # ==================== HU-012 (Consultar reservas por usuario) ====================
+    def obtener_reservas_usuario(self, usuario_id: int, usuario_autenticado: dict) -> dict:
+        
+        id_usuario_auth = usuario_autenticado.get('id_usuario')
+        id_rol_auth = usuario_autenticado.get('id_rol')
+        
+        # Validar que el usuario existe
+        usuario = self.usuario_repo.get_by_id(usuario_id)
+        if not usuario:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={
+                    "success": False,
+                    "statusCode": 404,
+                    "message": "Usuario no encontrado",
+                    "error": {
+                        "error_code": "USUARIO_NOT_FOUND",
+                        "details": f"No existe un usuario con el ID {usuario_id}",
+                        "timestamp": datetime.now().isoformat()
+                    }
+                }
+            )
+        
+        # Validar permisos
+        es_mismo_usuario = (id_usuario_auth == usuario_id)
+        es_admin = (id_rol_auth == 1)
+        
+        if not es_mismo_usuario and not es_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "success": False,
+                    "statusCode": 403,
+                    "message": "Acceso denegado",
+                    "error": {
+                        "error_code": "ACCESO_DENEGADO",
+                        "details": "No tiene permisos para consultar las reservas de otro usuario",
+                        "timestamp": datetime.now().isoformat()
+                    }
+                }
+            )
+        
+        reservas = self.reserva_repo.get_reservas_by_usuario(usuario_id)
+        
+        reservas_con_zona = []
+        for r in reservas:
+            zona = self.zona_repo.get_by_id(r.id_zona)
+            reservas_con_zona.append({
+                "id_reserva": r.id_reserva,
+                "zona": {
+                    "id_zona": r.id_zona,
+                    "nombre": zona.nombre if zona else f"Zona {r.id_zona}"
+                },
+                "fecha": r.fecha,
+                "hora_inicio": r.hora_inicio,
+                "hora_fin": r.hora_fin,
+                "estado": r.estado,
+                "fecha_solicitud": r.fecha_solicitud.isoformat()
+            })
+        
+        mensaje = "Consulta exitosa" if reservas_con_zona else "El usuario no tiene reservas registradas"
+        
+        return {
+            "success": True,
+            "statusCode": 200,
+            "message": mensaje,
+            "data": {
+                "usuario": {
+                    "id_usuario": usuario.id_usuario,
+                    "nombre_completo": usuario.nombre_completo,
+                    "email": usuario.email
+                },
+                "reservas": reservas_con_zona
+            }
+        }

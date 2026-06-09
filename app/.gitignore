@@ -15,3 +15,6 @@ __pycache__/
 _pycache_/ 
 *.pyc 
 *.db 
+_pycache_/ 
+*.pyc 
+*.db 

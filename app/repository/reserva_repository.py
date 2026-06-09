@@ -78,3 +78,13 @@ class ReservaRepository:
         reserva.cancelado_por = id_usuario
         
         return reserva
+
+    # ==================== HU-012 (Consultar reservas por usuario) ====================
+    def get_reservas_by_usuario(self, usuario_id: int) -> List[ReservaResponse]:
+        reservas = []
+        for reserva in self._db.values():
+            if reserva.id_usuario == usuario_id:
+                reservas.append(reserva)
+        # Ordenar por fecha descendente
+        reservas.sort(key=lambda x: x.fecha, reverse=True)
+        return reservas
