@@ -316,3 +316,28 @@ class ActualizarReporteRequest(BaseModel):
     estado: str
     observaciones: Optional[str] = None
     id_responsable: Optional[int] = None
+
+ # ==================== HU-009 (Solicitud de reserva) ====================
+
+class ReservaCreate(BaseModel):
+    id_zona: int
+    fecha: str
+    hora_inicio: str
+    hora_fin: str
+    observaciones: Optional[str] = None
+
+
+class ReservaResponse(BaseModel):
+    id_reserva: int
+    id_usuario: int
+    nombre_usuario: str
+    id_zona: int
+    nombre_zona: str
+    fecha: str
+    hora_inicio: str
+    hora_fin: str
+    estado: str
+    fecha_solicitud: datetime
+
+    class Config:
+        from_attributes = True   

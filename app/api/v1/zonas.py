@@ -1,8 +1,9 @@
 # app/api/v1/zonas.py
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from datetime import datetime
 import jwt
+from domain.models_domain import ZonaCreate, ZonaResponse
+from repositories import zona_repo  # ← Importar desde el archivo global
 
 router = APIRouter(tags=["Zonas Comunes"])
 
@@ -22,44 +23,24 @@ def validar_token(token: str):
         return None
 
 
-@router.get("/zonas/disponibilidad")
-def consultar_disponibilidad(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    zona_id: int = Query(..., description="ID de la zona común"),
-    fecha: str = Query(..., description="Fecha (YYYY-MM-DD)"),
-    hora_inicio: str = Query(..., description="Hora inicio (HH:MM)"),
-    hora_fin: str = Query(..., description="Hora fin (HH:MM)")
-):
+@router.post("/zonas", response_model=ZonaResponse, status_code=201)
+def crear_zona(data: ZonaCreate, credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     usuario = validar_token(token)
     if not usuario:
         raise HTTPException(status_code=401, detail="Token inválido")
     
-    # Validar fecha
-    try:
-        fecha_actual = datetime.now().date()
-        fecha_consulta = datetime.strptime(fecha, "%Y-%m-%d").date()
-        if fecha_consulta < fecha_actual:
-            raise HTTPException(status_code=400, detail="La fecha no puede ser anterior a la fecha actual")
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Formato de fecha inválido. Use YYYY-MM-DD")
+    if usuario.get('id_rol') != 1:
+        raise HTTPException(status_code=403, detail="Acceso denegado")
     
-    # Validar horario
-    if hora_inicio >= hora_fin:
-        raise HTTPException(status_code=400, detail="La hora de inicio debe ser menor que la hora de fin")
+    return zona_repo.create(data)
+
+
+@router.get("/zonas")
+def listar_zonas(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    usuario = validar_token(token)
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Token inválido")
     
-    # Respuesta simulada (por ahora)
-    return {
-        "success": True,
-        "statusCode": 200,
-        "message": "La zona está disponible",
-        "data": {
-            "zona_id": zona_id,
-            "nombre": "Salón Social",
-            "fecha": fecha,
-            "hora_inicio": hora_inicio,
-            "hora_fin": hora_fin,
-            "disponible": True,
-            "conflicto_con": None
-        }
-    }
+    return zona_repo.get_all()
