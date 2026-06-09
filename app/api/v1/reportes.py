@@ -1,12 +1,12 @@
-# app/api/v1/reservas.py
+# app/api/v1/reportes.py
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from datetime import datetime
 import jwt
 
-from domain.models_domain import ReservaCreate, ReservaResponse
-from service.reserva_service import ReservaService
-from repositories import reserva_repo, zona_repo, usuario_repo
+from domain.models_domain import ReporteCreate, ReporteResponse, ActualizarReporteRequest
+from service.reporte_service import ReporteService
+from repository.reporte_repository import ReporteRepository
 
 
 SECRET_KEY = "mi_clave_secreta"
@@ -26,12 +26,23 @@ def validar_token(token: str):
         return None
 
 
-router = APIRouter(tags=["Reservas"])
+router = APIRouter(tags=["Reportes"])
 
 
-@router.post("/reservas", response_model=ReservaResponse, status_code=201)
-def solicitar_reserva(
-    data: ReservaCreate,
+@router.get("/reportes", tags=["Reportes"])
+def listar_reportes(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    usuario = validar_token(token)
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Token inválido")
+    
+    reporte_repo = ReporteRepository()
+    return reporte_repo.get_all()
+
+
+@router.post("/reportes", response_model=ReporteResponse, status_code=201)
+def crear_reporte(
+    data: ReporteCreate,
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     token = credentials.credentials
@@ -51,14 +62,16 @@ def solicitar_reserva(
             }
         )
     
-    reserva_service = ReservaService(reserva_repo, zona_repo, usuario_repo)
+    reporte_repo = ReporteRepository()
+    reporte_service = ReporteService(reporte_repo)
     
-    return reserva_service.solicitar_reserva(data, usuario)
+    return reporte_service.crear_reporte(data, usuario)
 
 
-@router.delete("/reservas/{reserva_id}")
-def cancelar_reserva(
-    reserva_id: int,
+@router.patch("/reportes/{reporte_id}/estado", response_model=ReporteResponse)
+def actualizar_estado_reporte(
+    reporte_id: int,
+    data: ActualizarReporteRequest,
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     token = credentials.credentials
@@ -66,6 +79,7 @@ def cancelar_reserva(
     if not usuario:
         raise HTTPException(status_code=401, detail="Token inválido")
     
-    reserva_service = ReservaService(reserva_repo, zona_repo, usuario_repo)
+    reporte_repo = ReporteRepository()
+    reporte_service = ReporteService(reporte_repo)
     
-    return reserva_service.cancelar_reserva(reserva_id, usuario)
+    return reporte_service.actualizar_estado(reporte_id, data, usuario)
