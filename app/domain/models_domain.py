@@ -200,6 +200,8 @@ class ReservaResponse(BaseModel):
     observaciones: Optional[str] = None
     fecha_aprobacion: Optional[datetime] = None
     aprobado_por: Optional[int] = None
+    fecha_cancelacion: Optional[datetime] = None  # ← Agregar
+    cancelado_por: Optional[int] = None  # ← Agregar
 
     class Config:
         from_attributes = True
