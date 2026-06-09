@@ -118,7 +118,6 @@ class ReservaService:
                 }
             )
         
-        # Asegurar que nombre_usuario no sea None
         nombre_usuario = usuario_autenticado.get('nombre_completo')
         if not nombre_usuario:
             nombre_usuario = f"Usuario {id_usuario}"
