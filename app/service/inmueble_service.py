@@ -1,6 +1,9 @@
 # app/service/inmueble_service.py
 from fastapi import HTTPException, status
-from domain.models_domain import InmuebleCreate, Inmueble
+from domain.models_domain import (
+    InmuebleResponse, InmuebleCreate, ListaInmueblesResponse,
+    PaginacionInfo, InmuebleConPropietario
+)
 from repository.inmueble_repository import InmuebleRepository
 
 
@@ -9,7 +12,7 @@ class InmuebleService:
     def __init__(self, repo: InmuebleRepository):
         self.repo = repo
 
-    def create_inmueble(self, data: InmuebleCreate, usuario_autenticado: dict) -> Inmueble:
+    def create_inmueble(self, data: InmuebleCreate, usuario_autenticado: dict) -> InmuebleResponse:
         
         if usuario_autenticado.get('id_rol') != 1:
             raise HTTPException(
@@ -30,3 +33,42 @@ class InmuebleService:
             )
 
         return self.repo.create(data)
+
+    def listar_inmuebles(self, torre=None, estado=None, nombre_propietario=None, page=1, limit=10):
+        
+        if estado and estado not in ["disponible", "ocupado", "mantenimiento"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El estado debe ser: disponible, ocupado o mantenimiento"
+            )
+        
+        inmuebles, total = self.repo.listar_con_filtros(torre, estado, nombre_propietario, page, limit)
+        
+        total_paginas = (total + limit - 1) // limit if total > 0 else 0
+        
+        inmuebles_con_propietario = []
+        for inmueble in inmuebles:
+            inmuebles_con_propietario.append(
+                InmuebleConPropietario(**inmueble.dict())
+            )
+        
+        return ListaInmueblesResponse(
+            inmuebles=inmuebles_con_propietario,
+            paginacion=PaginacionInfo(
+                total=total,
+                page=page,
+                limit=limit,
+                total_paginas=total_paginas
+            )
+        )
+
+    def asignar_propietario(self, inmueble_id: int, id_propietario: int, usuario_autenticado: dict):
+        
+        inmueble = self.repo.get_by_id(inmueble_id)
+        if not inmueble:
+            raise HTTPException(status_code=404, detail=f"Inmueble con ID {inmueble_id} no encontrado")
+        
+        if inmueble.id_propietario is not None:
+            raise HTTPException(status_code=400, detail="El inmueble ya tiene un propietario asignado")
+        
+        return self.repo.asignar_propietario(inmueble_id, id_propietario)
