@@ -31,6 +31,13 @@ class ReservaRepository:
     def get_by_id(self, reserva_id: int) -> Optional[ReservaResponse]:
         return self._db.get(reserva_id)
 
+    def get_pendientes(self) -> List[ReservaResponse]:
+        pendientes = []
+        for reserva in self._db.values():
+            if reserva.estado == "pendiente":
+                pendientes.append(reserva)
+        return pendientes
+
     def hay_conflicto(self, zona_id: int, fecha: str, hora_inicio: str, hora_fin: str) -> bool:
         for reserva in self._db.values():
             if reserva.id_zona == zona_id and reserva.fecha == fecha:
@@ -38,13 +45,6 @@ class ReservaRepository:
                     if (hora_inicio < reserva.hora_fin and hora_fin > reserva.hora_inicio):
                         return True
         return False
-
-    def get_pendientes(self) -> List[ReservaResponse]:
-        pendientes = []
-        for reserva in self._db.values():
-            if reserva.estado == "pendiente":
-                pendientes.append(reserva)
-        return pendientes
 
     # ==================== HU-010 (Aprobar/Rechazar reserva) ====================
     def aprobar_rechazar(self, reserva_id: int, estado: str, id_administrador: int) -> Optional[ReservaResponse]:
@@ -58,5 +58,23 @@ class ReservaRepository:
         reserva.estado = estado
         reserva.fecha_aprobacion = datetime.now()
         reserva.aprobado_por = id_administrador
+        
+        return reserva
+
+    # ==================== HU-011 (Cancelar reserva) ====================
+    def cancelar(self, reserva_id: int, id_usuario: int) -> Optional[ReservaResponse]:
+        reserva = self._db.get(reserva_id)
+        if not reserva:
+            return None
+        
+        if reserva.estado == "cancelada":
+            return None
+        
+        if reserva.estado == "rechazada":
+            return None
+        
+        reserva.estado = "cancelada"
+        reserva.fecha_cancelacion = datetime.now()
+        reserva.cancelado_por = id_usuario
         
         return reserva
