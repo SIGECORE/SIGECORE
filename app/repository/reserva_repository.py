@@ -1,58 +1,39 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import and_
-from datetime import date, time, datetime
-from typing import Optional
-from app.models import ZonaComun, Reserva, EstadoReservaEnum, Usuario
+# app/repository/reserva_repository.py
+from typing import Dict, Optional, List
+from domain.models_domain import ReservaResponse, ReservaCreate
+from datetime import datetime
+
 
 class ReservaRepository:
-    
-    def __init__(self, db: Session):
-        self.db = db
-    
-    def get_zona_by_id(self, zona_id: int) -> Optional[ZonaComun]:
-        return self.db.query(ZonaComun).filter(ZonaComun.id == zona_id).first()
-    
-    def get_usuario_by_id(self, usuario_id: int) -> Optional[Usuario]:
-        return self.db.query(Usuario).filter(Usuario.id == usuario_id).first()
-    
-    def find_reserva_conflictiva(
-        self, 
-        zona_id: int, 
-        fecha: date, 
-        hora_inicio: time, 
-        hora_fin: time
-    ) -> Optional[Reserva]:
-        conflicto = self.db.query(Reserva).filter(
-            and_(
-                Reserva.zona_id == zona_id,
-                Reserva.fecha == fecha,
-                Reserva.estado == EstadoReservaEnum.APROBADA,
-                Reserva.hora_inicio < hora_fin,
-                Reserva.hora_fin > hora_inicio
-            )
-        ).first()
-        return conflicto
-    
-    def crear_reserva(
-        self, 
-        usuario_id: int,
-        zona_id: int,
-        fecha: date,
-        hora_inicio: time,
-        hora_fin: time,
-        observaciones: Optional[str] = None
-    ) -> Reserva:
-        nueva_reserva = Reserva(
-            usuario_id=usuario_id,
-            zona_id=zona_id,
-            fecha=fecha,
-            hora_inicio=hora_inicio,
-            hora_fin=hora_fin,
-            estado=EstadoReservaEnum.PENDIENTE,
-            observaciones=observaciones,
+
+    def __init__(self):
+        self._db: Dict[int, ReservaResponse] = {}
+        self._next_id: int = 1
+
+    def create(self, data: ReservaCreate, id_usuario: int, nombre_usuario: str, nombre_zona: str) -> ReservaResponse:
+        reserva = ReservaResponse(
+            id_reserva=self._next_id,
+            id_usuario=id_usuario,
+            nombre_usuario=nombre_usuario,
+            id_zona=data.id_zona,
+            nombre_zona=nombre_zona,
+            fecha=data.fecha,
+            hora_inicio=data.hora_inicio,
+            hora_fin=data.hora_fin,
+            estado="pendiente",
             fecha_solicitud=datetime.now()
         )
-        self.db.add(nueva_reserva)
-        self.db.commit()
-        self.db.refresh(nueva_reserva)
-        return nueva_reserva
+        self._db[self._next_id] = reserva
+        self._next_id += 1
+        return reserva
+
+    def get_by_id(self, reserva_id: int) -> Optional[ReservaResponse]:
+        return self._db.get(reserva_id)
+
+    def hay_conflicto(self, zona_id: int, fecha: str, hora_inicio: str, hora_fin: str) -> bool:
+        for reserva in self._db.values():
+            if reserva.id_zona == zona_id and reserva.fecha == fecha:
+                if reserva.estado == "aprobada":
+                    if (hora_inicio < reserva.hora_fin and hora_fin > reserva.hora_inicio):
+                        return True
+        return False
