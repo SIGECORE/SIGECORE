@@ -38,6 +38,15 @@ class UsuarioResponse(BaseModel):
     bloqueado_hasta: Optional[datetime] = None
     ultimo_login: Optional[datetime] = None
 
+# ==================== HU-001 (Creación de usuarios) ====================
+
+class UsuarioCreate(BaseModel):
+    nombre_completo: str
+    email: str
+    telefono: Optional[str] = None
+    password: str
+    id_rol: int
+
 
 # ==================== HU-002 (Inicio de sesión) ====================
 
