@@ -18,7 +18,16 @@ class ReservaService:
         
         # Validar que el usuario esté activo
         usuario = self.usuario_repo.get_by_id(id_usuario)
-        if not usuario or not usuario.activo:
+        
+        # Si el usuario no existe en el repositorio, obtenemos los datos del token
+        if not usuario:
+            usuario = {
+                "id_usuario": id_usuario,
+                "activo": True,
+                "nombre_completo": usuario_autenticado.get('nombre_completo', f"Usuario {id_usuario}")
+            }
+        
+        if not usuario.get("activo", False):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
@@ -182,10 +191,15 @@ class ReservaService:
                 }
             )
         
-        # Validar que la fecha no sea pasada
+        # Validar que la fecha/hora no sea pasada
         try:
-            fecha_reserva = datetime.strptime(reserva.fecha, "%Y-%m-%d").date()
-            if fecha_reserva < datetime.now().date():
+            fecha_reserva = datetime.strptime(reserva.fecha, "%Y-%m-%d")
+            hora_inicio_reserva = datetime.strptime(reserva.hora_inicio, "%H:%M").time()
+            datetime_reserva = datetime.combine(fecha_reserva.date(), hora_inicio_reserva)
+            
+            ahora = datetime.now()
+            
+            if datetime_reserva < ahora:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail={
@@ -194,7 +208,7 @@ class ReservaService:
                         "message": "No se puede cancelar la reserva",
                         "error": {
                             "error_code": "FECHA_PASADA",
-                            "details": "No se puede cancelar una reserva con fecha anterior a la actual",
+                            "details": "No se puede cancelar una reserva con fecha/hora anterior a la actual",
                             "timestamp": datetime.now().isoformat()
                         }
                     }
@@ -223,30 +237,30 @@ class ReservaService:
         
         # Validar anticipación de 24 horas (solo para residentes)
         if not es_admin:
-            try:
-                fecha_reserva = datetime.strptime(reserva.fecha, "%Y-%m-%d")
-                hora_inicio = datetime.strptime(reserva.hora_inicio, "%H:%M").time()
-                datetime_reserva = datetime.combine(fecha_reserva.date(), hora_inicio)
-                
-                ahora = datetime.now()
-                horas_anticipacion = (datetime_reserva - ahora).total_seconds() / 3600
-                
-                if horas_anticipacion < 24:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail={
-                            "success": False,
-                            "statusCode": 400,
-                            "message": "No se puede cancelar la reserva",
-                            "error": {
-                                "error_code": "CANCELACION_TARDIA",
-                                "details": "Las reservas solo se pueden cancelar con al menos 24 horas de anticipación",
-                                "timestamp": datetime.now().isoformat()
-                            }
+            # Combinar fecha y hora de la reserva
+            fecha_reserva = datetime.strptime(reserva.fecha, "%Y-%m-%d")
+            hora_inicio = datetime.strptime(reserva.hora_inicio, "%H:%M").time()
+            datetime_reserva = datetime.combine(fecha_reserva.date(), hora_inicio)
+            
+            ahora = datetime.now()
+            
+            # Calcular horas de anticipación
+            horas_anticipacion = (datetime_reserva - ahora).total_seconds() / 3600
+            
+            if horas_anticipacion < 24 and horas_anticipacion > 0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail={
+                        "success": False,
+                        "statusCode": 400,
+                        "message": "No se puede cancelar la reserva",
+                        "error": {
+                            "error_code": "CANCELACION_TARDIA",
+                            "details": f"Las reservas solo se pueden cancelar con al menos 24 horas de anticipación. Faltan {horas_anticipacion:.1f} horas.",
+                            "timestamp": datetime.now().isoformat()
                         }
-                    )
-            except:
-                pass
+                    }
+                )
         
         reserva_actualizada = self.reserva_repo.cancelar(reserva_id, id_usuario_auth)
         
@@ -334,9 +348,9 @@ class ReservaService:
             "message": mensaje,
             "data": {
                 "usuario": {
-                    "id_usuario": usuario.id_usuario,
-                    "nombre_completo": usuario.nombre_completo,
-                    "email": usuario.email
+                    "id_usuario": usuario.get("id_usuario"),
+                    "nombre_completo": usuario.get("nombre_completo"),
+                    "email": usuario.get("email")
                 },
                 "reservas": reservas_con_zona
             }

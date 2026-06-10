@@ -45,6 +45,7 @@ class UsuarioRepository:
 
     def create(self, usuario_data: dict) -> dict:
         usuario_data["id_usuario"] = self._next_id
+        usuario_data["activo"] = True  # ← FORZAR ACTIVO
         self._db[self._next_id] = usuario_data
         self._next_id += 1
         return usuario_data
@@ -68,9 +69,19 @@ class UsuarioRepository:
         return self.get_by_id(usuario_id)
 
     def actualizar(self, usuario_data: dict) -> dict:
-        usuario_id = usuario_data["id_usuario"]
-        self._db[usuario_id] = usuario_data
-        return usuario_data
+        usuario_id = usuario_data.get("id_usuario")
+        if usuario_id in self._db:
+            self._db[usuario_id] = usuario_data
+            return usuario_data
+        return None
+
+    def set_activo(self, usuario_id: int, activo: bool) -> bool:
+        user = self._db.get(usuario_id)
+        if user:
+            user["activo"] = activo
+            self._db[usuario_id] = user
+            return True
+        return False
 
     def get_all(self) -> Dict[int, dict]:
         return self._db

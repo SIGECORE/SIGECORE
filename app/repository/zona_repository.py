@@ -10,7 +10,7 @@ class ZonaRepository:
         self._db: Dict[int, ZonaResponse] = {}
         self._next_id: int = 1
 
-    def get_by_id(self, zona_id: int) -> Optional[ZonaResponse]:
+    def get_by_id(self, zona_id: int):
         return self._db.get(zona_id)
 
     def exists_by_nombre(self, nombre: str) -> bool:

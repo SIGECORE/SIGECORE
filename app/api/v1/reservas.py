@@ -6,7 +6,8 @@ import jwt
 
 from domain.models_domain import ReservaCreate, ReservaResponse
 from service.reserva_service import ReservaService
-from repositories import reserva_repo, zona_repo, usuario_repo
+from repositories import reserva_repo, zona_repo
+from repository.usuario_repository import UsuarioRepository  # ← USAR EL REPOSITORIO DIRECTO
 
 
 SECRET_KEY = "mi_clave_secreta"
@@ -25,6 +26,9 @@ def validar_token(token: str):
     except:
         return None
 
+
+# Crear el repositorio de usuarios DIRECTAMENTE
+usuario_repo_directo = UsuarioRepository()
 
 router = APIRouter(tags=["Reservas"])
 
@@ -51,7 +55,8 @@ def solicitar_reserva(
             }
         )
     
-    reserva_service = ReservaService(reserva_repo, zona_repo, usuario_repo)
+    # Crear servicio con el repositorio DIRECTO
+    reserva_service = ReservaService(reserva_repo, zona_repo, usuario_repo_directo)
     
     return reserva_service.solicitar_reserva(data, usuario)
 
@@ -66,7 +71,7 @@ def cancelar_reserva(
     if not usuario:
         raise HTTPException(status_code=401, detail="Token inválido")
     
-    reserva_service = ReservaService(reserva_repo, zona_repo, usuario_repo)
+    reserva_service = ReservaService(reserva_repo, zona_repo, usuario_repo_directo)
     
     return reserva_service.cancelar_reserva(reserva_id, usuario)
 
@@ -81,6 +86,7 @@ def obtener_reservas_usuario(
     if not usuario:
         raise HTTPException(status_code=401, detail="Token inválido")
     
-    reserva_service = ReservaService(reserva_repo, zona_repo, usuario_repo)
+    reserva_service = ReservaService(reserva_repo, zona_repo, usuario_repo_directo)
     
     return reserva_service.obtener_reservas_usuario(usuario_id, usuario)
+from repositories import usuario_repo, zona_repo, reserva_repo

@@ -21,7 +21,7 @@ from domain.models_domain import (
 )
 
 from service.usuario_service import UsuarioService
-from repository.usuario_repository import UsuarioRepository
+from repositories import usuario_repo  # ← USAR EL REPOSITORIO CENTRAL
 
 
 SECRET_KEY = "mi_clave_secreta"
@@ -41,8 +41,7 @@ def validar_token(token: str):
         return None
 
 
-repo = UsuarioRepository()
-service = UsuarioService(repo)
+service = UsuarioService(usuario_repo)
 
 router = APIRouter(
     prefix="/usuarios",
@@ -117,7 +116,7 @@ def create_usuario(
             }
         )
     
-    if repo.existe_por_email(data.email):
+    if usuario_repo.existe_por_email(data.email):
         raise HTTPException(
             status_code=400,
             detail={
@@ -167,7 +166,7 @@ def create_usuario(
         bcrypt.gensalt(rounds=10)
     ).decode("utf-8")
     
-    nuevo_usuario = repo.create({
+    nuevo_usuario = usuario_repo.create({
         "nombre_completo": data.nombre_completo,
         "email": data.email.lower(),
         "telefono": data.telefono,
@@ -232,92 +231,16 @@ def actualizar_rol(
             detail={
                 "success": False,
                 "statusCode": 401,
-                "message": "No autenticado",
-                "error": {
-                    "error_code": "NO_AUTENTICADO",
-                    "details": "Se requiere un token de autenticación válido",
-                    "timestamp": datetime.utcnow().isoformat()
-                }
+                "message": "No autenticado"
             }
         )
     
-    if usuario.get('id_rol') != 1:
-        raise HTTPException(
-            status_code=403,
-            detail={
-                "success": False,
-                "statusCode": 403,
-                "message": "Acceso denegado",
-                "error": {
-                    "error_code": "ACCESO_DENEGADO",
-                    "details": "Se requiere rol de administrador para realizar esta acción",
-                    "timestamp": datetime.utcnow().isoformat()
-                }
-            }
-        )
-    
-    user = repo.get_by_id(id)
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail={
-                "success": False,
-                "statusCode": 404,
-                "message": "Usuario no encontrado",
-                "error": {
-                    "error_code": "USUARIO_NOT_FOUND",
-                    "details": f"No existe un usuario con el ID {id}",
-                    "timestamp": datetime.utcnow().isoformat()
-                }
-            }
-        )
-    
-    if data.id_rol not in [1, 2]:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "success": False,
-                "statusCode": 400,
-                "message": "Error en la solicitud",
-                "error": {
-                    "error_code": "ROL_INVALIDO",
-                    "details": "El rol debe ser 1 (administrador) o 2 (residente)",
-                    "timestamp": datetime.utcnow().isoformat()
-                }
-            }
-        )
-    
-    if usuario.get('id_usuario') == id:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "success": False,
-                "statusCode": 400,
-                "message": "Error en la solicitud",
-                "error": {
-                    "error_code": "AUTO_MODIFICACION_NO_PERMITIDA",
-                    "details": "No puedes cambiar tu propio rol de administrador",
-                    "timestamp": datetime.utcnow().isoformat()
-                }
-            }
-        )
-    
-    rol_anterior = user["id_rol"]
-    user["id_rol"] = data.id_rol
-    repo.actualizar(user)
-    
-    auditoria = {
-        "id_usuario_modificado": id,
-        "rol_anterior": rol_anterior,
-        "rol_nuevo": data.id_rol,
-        "id_usuario_modificador": usuario.get('id_usuario'),
-        "ip_origen": request.client.host if request.client else None,
-        "fecha": datetime.utcnow()
-    }
-    repo.registrar_auditoria(auditoria)
-    
-    rol_nombre = "administrador" if data.id_rol == 1 else "residente"
-    modificador_nombre = usuario.get('nombre_completo', 'Administrador')
+    resultado = service.actualizar_rol(
+        id,
+        data.id_rol,
+        usuario,
+        request.client.host if request.client else None
+    )
     
     return JSONResponse(
         status_code=200,
@@ -325,14 +248,7 @@ def actualizar_rol(
             "success": True,
             "statusCode": 200,
             "message": "Rol actualizado exitosamente",
-            "data": {
-                "id_usuario": user["id_usuario"],
-                "nombre_completo": user["nombre_completo"],
-                "email": user["email"],
-                "id_rol": user["id_rol"],
-                "rol_nombre": rol_nombre,
-                "actualizado_por": f"{modificador_nombre} (ID: {usuario.get('id_usuario')})"
-            }
+            "data": resultado
         }
     )
 
@@ -346,17 +262,16 @@ def debug_usuarios(
     if not usuario or usuario.get('id_rol') != 1:
         raise HTTPException(status_code=403, detail="Acceso denegado")
     
-    todos = repo.get_all()
+    todos = usuario_repo.get_all()
     
     resultado = []
     for u in todos.values():
         resultado.append({
-            "id_usuario": u["id_usuario"],
-            "nombre_completo": u["nombre_completo"],
-            "email": u["email"],
-            "password_hash": u["password_hash"][:20] + "...",
-            "id_rol": u["id_rol"],
-            "activo": u["activo"],
+            "id_usuario": u.get("id_usuario"),
+            "nombre_completo": u.get("nombre_completo"),
+            "email": u.get("email"),
+            "id_rol": u.get("id_rol"),
+            "activo": u.get("activo"),
             "intentos_fallidos": u.get("intentos_fallidos", 0),
             "bloqueado_hasta": str(u.get("bloqueado_hasta")) if u.get("bloqueado_hasta") else None
         })
@@ -364,72 +279,24 @@ def debug_usuarios(
     return {"usuarios": resultado}
 
 
-@router.patch("/debug/{usuario_id}/desactivar")
-def desactivar_usuario(
+@router.patch("/debug/activar-usuario/{usuario_id}")
+def activar_usuario_directo(
     usuario_id: int,
+    activo: bool,
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     usuario = validar_token(credentials.credentials)
+    
     if not usuario or usuario.get('id_rol') != 1:
         raise HTTPException(status_code=403, detail="Acceso denegado")
     
-    user = repo.get_by_id(usuario_id)
-    if not user:
+    if usuario_id in usuario_repo._db:
+        usuario_repo._db[usuario_id]["activo"] = activo
+        estado = "activado" if activo else "desactivado"
+        return {
+            "success": True,
+            "message": f"Usuario {usuario_id} {estado}",
+            "activo": usuario_repo._db[usuario_id]["activo"]
+        }
+    else:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    
-    user["activo"] = False
-    repo.actualizar(user)
-    
-    return {"message": f"Usuario {usuario_id} desactivado"}
-
-
-@router.patch("/debug/{usuario_id}/activar")
-def activar_usuario(
-    usuario_id: int,
-    credentials: HTTPAuthorizationCredentials = Depends(security)
-):
-    usuario = validar_token(credentials.credentials)
-    if not usuario or usuario.get('id_rol') != 1:
-        raise HTTPException(status_code=403, detail="Acceso denegado")
-    
-    user = repo.get_by_id(usuario_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    
-    user["activo"] = True
-    repo.actualizar(user)
-    
-    return {"message": f"Usuario {usuario_id} activado"}
-
-
-@router.patch("/debug/{usuario_id}/reset")
-def resetear_usuario(
-    usuario_id: int,
-    credentials: HTTPAuthorizationCredentials = Depends(security)
-):
-    usuario = validar_token(credentials.credentials)
-    if not usuario or usuario.get('id_rol') != 1:
-        raise HTTPException(status_code=403, detail="Acceso denegado")
-    
-    user = repo.get_by_id(usuario_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    
-    user["intentos_fallidos"] = 0
-    user["bloqueado_hasta"] = None
-    user["activo"] = True
-    repo.actualizar(user)
-    
-    return {"message": f"Usuario {usuario_id} reseteado"}
-
-@router.get("/debug/auditoria")
-def debug_auditoria(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
-):
-    usuario = validar_token(credentials.credentials)
-    
-    if not usuario or usuario.get('id_rol') != 1:
-        raise HTTPException(status_code=403, detail="Acceso denegado")
-    
-    # Retornar la auditoría desde el repositorio
-    return {"auditoria": repo.get_auditoria()}

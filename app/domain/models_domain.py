@@ -38,6 +38,7 @@ class UsuarioResponse(BaseModel):
     bloqueado_hasta: Optional[datetime] = None
     ultimo_login: Optional[datetime] = None
 
+
 # ==================== HU-001 (Creación de usuarios) ====================
 
 class UsuarioCreate(BaseModel):
@@ -86,8 +87,10 @@ class InmuebleBase(BaseModel):
     area_m2: float
 
 
-class InmuebleCreate(InmuebleBase):
-    pass
+class InmuebleCreate(BaseModel):
+    numero: Optional[str] = None
+    torre: Optional[str] = None
+    area_m2: Optional[float] = None
 
 
 class InmuebleResponse(InmuebleBase):
@@ -277,7 +280,7 @@ class ComunicadoResponse(ComunicadoBase):
 class PagoRequest(BaseModel):
     id_inmueble: int
     monto: float
-    metodo_pago: str
+    metodo_pago: Optional[str] = None  # ← AHORA ES OPCIONAL
     token_pasarela: str
 
 
