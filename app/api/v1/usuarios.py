@@ -48,3 +48,26 @@ def asignar_rol(
     rol_service = RolService(usuario_repo, auditoria_repo)
     
     return rol_service.asignar_rol(usuario_id, data, usuario, client_ip)
+
+@router.post("/public/crear-usuario-3")
+def crear_usuario_3():
+    from repositories import usuario_repo
+    import bcrypt
+    from datetime import datetime
+    
+    user_data = {
+        'nombre_completo': 'Otro Residente',
+        'email': 'otro@example.com',
+        'telefono': '3001234567',
+        'password_hash': bcrypt.hashpw('123456'.encode(), bcrypt.gensalt()).decode(),
+        'id_rol': 2,
+        'activo': True,
+        'intentos_fallidos': 0,
+        'bloqueado_hasta': None,
+        'ultimo_login': None,
+        'fecha_registro': datetime.now()
+    }
+    
+    nuevo = usuario_repo.create(user_data)
+    
+    return {"message": "Usuario 3 creado", "id": nuevo["id_usuario"], "activo": nuevo["activo"]}

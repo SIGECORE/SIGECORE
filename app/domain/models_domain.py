@@ -39,6 +39,16 @@ class UsuarioResponse(BaseModel):
     ultimo_login: Optional[datetime] = None
 
 
+# ==================== HU-001 (Creación de usuarios) ====================
+
+class UsuarioCreate(BaseModel):
+    nombre_completo: str
+    email: str
+    telefono: Optional[str] = None
+    password: str
+    id_rol: int
+
+
 # ==================== HU-002 (Inicio de sesión) ====================
 
 class LoginRequest(BaseModel):
@@ -77,8 +87,10 @@ class InmuebleBase(BaseModel):
     area_m2: float
 
 
-class InmuebleCreate(InmuebleBase):
-    pass
+class InmuebleCreate(BaseModel):
+    numero: Optional[str] = None
+    torre: Optional[str] = None
+    area_m2: Optional[float] = None
 
 
 class InmuebleResponse(InmuebleBase):
@@ -176,6 +188,69 @@ class DisponibilidadResponse(BaseModel):
     data: DisponibilidadData
 
 
+# ==================== HU-009 / HU-010 / HU-011 / HU-012 (Reservas) ====================
+
+class ReservaCreate(BaseModel):
+    id_zona: int
+    fecha: str
+    hora_inicio: str
+    hora_fin: str
+    observaciones: Optional[str] = None
+
+
+class ReservaResponse(BaseModel):
+    id_reserva: int
+    id_usuario: int
+    nombre_usuario: str
+    id_zona: int
+    nombre_zona: str
+    fecha: str
+    hora_inicio: str
+    hora_fin: str
+    estado: str
+    fecha_solicitud: datetime
+    observaciones: Optional[str] = None
+    fecha_aprobacion: Optional[datetime] = None
+    aprobado_por: Optional[int] = None
+    fecha_cancelacion: Optional[datetime] = None
+    cancelado_por: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+
+class AprobarReservaRequest(BaseModel):
+    estado: str
+
+
+class ZonaReservaInfo(BaseModel):
+    id_zona: int
+    nombre: str
+
+
+class ReservaUsuarioResponse(BaseModel):
+    id_reserva: int
+    zona: ZonaReservaInfo
+    fecha: str
+    hora_inicio: str
+    hora_fin: str
+    estado: str
+    fecha_solicitud: datetime
+
+
+class UsuarioReservasInfo(BaseModel):
+    id_usuario: int
+    nombre_completo: str
+    email: str
+
+
+class ReservasUsuarioResponse(BaseModel):
+    success: bool
+    statusCode: int
+    message: str
+    data: dict
+
+
 # ==================== HU-013 / HU-014 (Comunicados) ====================
 
 class ComunicadoBase(BaseModel):
@@ -205,7 +280,7 @@ class ComunicadoResponse(ComunicadoBase):
 class PagoRequest(BaseModel):
     id_inmueble: int
     monto: float
-    metodo_pago: str
+    metodo_pago: Optional[str] = None  # ← AHORA ES OPCIONAL
     token_pasarela: str
 
 

@@ -1,6 +1,6 @@
 # app/repository/zona_repository.py
-from typing import Dict, Optional
-from domain.models_domain import ZonaCreate, ZonaResponse, EstadoZona
+from typing import Optional, Dict, List
+from domain.models_domain import ZonaResponse, ZonaCreate, EstadoZona
 from datetime import datetime
 
 
@@ -9,6 +9,9 @@ class ZonaRepository:
     def __init__(self):
         self._db: Dict[int, ZonaResponse] = {}
         self._next_id: int = 1
+
+    def get_by_id(self, zona_id: int):
+        return self._db.get(zona_id)
 
     def exists_by_nombre(self, nombre: str) -> bool:
         for zona in self._db.values():
@@ -30,3 +33,6 @@ class ZonaRepository:
         self._db[self._next_id] = zona
         self._next_id += 1
         return zona
+
+    def get_all(self) -> List[ZonaResponse]:
+        return list(self._db.values())
