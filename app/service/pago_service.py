@@ -216,7 +216,7 @@ class PagoService:
             pagos=pagos_con_inmueble
         )
 
-    def generar_reporte_cartera(self, usuario_autenticado: dict, torre: str = None, meses_mora_min: int = None) -> ReporteCarteraResponse:
+    def generar_reporte_cartera(self, usuario_autenticado: dict, torre: str = None, meses_mora_min: int = None) -> dict:
         
         id_rol = usuario_autenticado.get('id_rol')
         
@@ -261,6 +261,7 @@ class PagoService:
         inmuebles_con_propietario = [i for i in todos_inmuebles if i.id_propietario is not None]
         
         fecha_actual = datetime.now()
+        VALOR_CUOTA = 150000.00
         
         cartera = []
         total_adeudado_general = 0.0
@@ -294,30 +295,48 @@ class PagoService:
             total_adeudado = meses_mora * VALOR_CUOTA
             total_adeudado_general += total_adeudado
             
-            cartera.append(ItemCartera(
-                inmueble=InmuebleCartera(
-                    id_inmueble=inmueble.id_inmueble,
-                    numero=inmueble.numero,
-                    torre=inmueble.torre,
-                    area_m2=inmueble.area_m2
-                ),
-                propietario=PropietarioCartera(
-                    id_propietario=propietario.get("id_usuario"),
-                    nombre_completo=propietario.get("nombre_completo"),
-                    email=propietario.get("email"),
-                    telefono=propietario.get("telefono")
-                ),
-                meses_mora=meses_mora,
-                valor_cuota=VALOR_CUOTA,
-                total_adeudado=total_adeudado,
-                ultimo_pago=ultimo_pago_fecha
-            ))
+            cartera.append({
+                "inmueble": {
+                    "id_inmueble": inmueble.id_inmueble,
+                    "numero": inmueble.numero,
+                    "torre": inmueble.torre,
+                    "area_m2": inmueble.area_m2
+                },
+                "propietario": {
+                    "id_propietario": propietario.get("id_usuario"),
+                    "nombre_completo": propietario.get("nombre_completo"),
+                    "email": propietario.get("email"),
+                    "telefono": propietario.get("telefono")
+                },
+                "meses_mora": meses_mora,
+                "valor_cuota": VALOR_CUOTA,
+                "total_adeudado": total_adeudado,
+                "ultimo_pago": ultimo_pago_fecha
+            })
         
         total_morosos = len(cartera)
         
-        return ReporteCarteraResponse(
-            fecha_generacion=datetime.now(),
-            total_morosos=total_morosos,
-            total_adeudado=total_adeudado_general,
-            cartera=cartera
-        )
+        if total_morosos == 0:
+            return {
+                "success": True,
+                "statusCode": 200,
+                "message": "No hay residentes con pagos pendientes",
+                "data": {
+                    "fecha_generacion": datetime.now().isoformat(),
+                    "total_morosos": 0,
+                    "total_adeudado": 0,
+                    "cartera": []
+                }
+            }
+        
+        return {
+            "success": True,
+            "statusCode": 200,
+            "message": "Reporte generado exitosamente",
+            "data": {
+                "fecha_generacion": datetime.now().isoformat(),
+                "total_morosos": total_morosos,
+                "total_adeudado": total_adeudado_general,
+                "cartera": cartera
+            }
+        }
