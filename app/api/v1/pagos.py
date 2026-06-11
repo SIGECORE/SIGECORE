@@ -205,3 +205,14 @@ def verificar_inmuebles(credentials: HTTPAuthorizationCredentials = Depends(secu
         "db_directo": {k: {"id": v.id_inmueble, "propietario": v.id_propietario} for k, v in inmueble_repo._db.items()},
         "get_all_inmuebles": [(i.id_inmueble, i.id_propietario) for i in inmueble_repo.get_all_inmuebles()]
     }
+
+@router.get("/pagos/debug/verificar-usuario/{usuario_id}")
+def verificar_usuario(usuario_id: int, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    from repositories import usuario_repo
+    token = credentials.credentials
+    usuario = validar_token(token)
+    if not usuario or usuario.get('id_rol') != 1:
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+    
+    user = usuario_repo.get_by_id(usuario_id)
+    return {"usuario_id": usuario_id, "existe": user is not None, "user": user}

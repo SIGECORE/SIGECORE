@@ -205,6 +205,21 @@ class PagoService:
             )
         
         usuario = self.usuario_repo.get_by_id(usuario_id)
+        if not usuario:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "success": False,
+                    "statusCode": 404,
+                    "message": "Usuario no encontrado",
+                    "error": {
+                        "error_code": "USUARIO_NOT_FOUND",
+                        "details": f"No existe un usuario con el ID {usuario_id}",
+                        "timestamp": datetime.now().isoformat()
+                    }
+                }
+            )
+        
         usuario_info = UsuarioInfo(
             id_usuario=usuario.get("id_usuario"),
             nombre_completo=usuario.get("nombre_completo"),
